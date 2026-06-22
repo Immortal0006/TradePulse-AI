@@ -27,33 +27,6 @@ export default function Watchlist({ marketTicks }: WatchlistProps) {
 
   const displayTicks = marketTicks.length > 0 ? marketTicks : DEFAULT_GRID_DATA;
 
-import React, { useState } from 'react';
-import { ArrowUpRight, ArrowDownRight, Search, TrendingUp, Sparkles, Target, ShieldX, Coins } from 'lucide-react';
-
-interface StockTick {
-  symbol: string;
-  name: string;
-  price: number;
-  change: string;
-  timestamp: string;
-}
-interface WatchlistProps {
-  marketTicks: StockTick[];
-}
-// High-fidelity fallback matrix to provide instant value if server stream is buffering
-const DEFAULT_GRID_DATA: StockTick[] = [
-  { symbol: "SBIN.NS", name: "State Bank of India", price: 842.15, change: "+1.85%", timestamp: "Live" },
-  { symbol: "RELIANCE.NS", name: "Reliance Industries Ltd", price: 2945.60, change: "-0.42%", timestamp: "Live" },
-  { symbol: "TCS.NS", name: "Tata Consultancy Services", price: 4162.00, change: "+2.10%", timestamp: "Live" },
-  { symbol: "TATASTEEL.NS", name: "Tata Steel Limited", price: 164.80, change: "+3.45%", timestamp: "Live" }
-];
-
-export default function Watchlist({ marketTicks }: WatchlistProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [analyzedData, setAnalyzedData] = useState<any>(null);
-  const [searching, setSearching] = useState(false);
-
-  const displayTicks = marketTicks.length > 0 ? marketTicks : DEFAULT_GRID_DATA;
 
   const executeTickerSearch = (e: React.FormEvent) => {
     e.preventDefault();
