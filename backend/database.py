@@ -3,18 +3,21 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# 🔒 Hardcode the production connection directly to completely bypass variable mismatch bugs
-# 🔒 The correct, production-grade connection string
-DATABASE_URL = "postgresql://postgres.nwgunjybemssjpmuwlyi:Ud@3m6u9y8r@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
+# 🔒 Secure: Read dynamically from Render, fail back to local testing if empty
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Print a clean trace to your Render logs so you know it's using the hardcoded layer
-print("📡 TradePulse Database Service: Hardcoded cloud database pipeline initialized successfully.")
+if DATABASE_URL:
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/tradepulse"
 
 # Create high-performance connections pooling for PostgreSQL
 engine = create_engine(
     DATABASE_URL,
-    pool_size=10,
-    max_overflow=20,
+    pool_size=20,
+    max_overflow=40,
+    pool_timeout=30,
     pool_pre_ping=True
 )
 
