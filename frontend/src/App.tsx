@@ -22,21 +22,27 @@ export default function App() {
   const [simulatedLoss, setSimulatedLoss] = useState<number>(0);
 
   // Detect if the app is live or running locally
+// Detect if the app is live or running locally
   const IS_PROD = import.meta.env.PROD;
 
-// 🎯 Directly use your Render environment variable in production, fallback to local for dev
-const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
+  // 🎯 Dynamic Base HTTP URL setup
+  const API_BASE_URL = IS_PROD 
+    ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
+    : 'http://localhost:8000';
 
- // 1. OPEN PERSISTENT EVENT-DRIVEN WEBSOCKET PIPE (WITH AUTO-RECONNECT)
+  // 🎯 Dynamic Base WebSocket URL setup (Strips http/https and swaps to ws/wss cleanly)
+  const WS_BASE_URL = API_BASE_URL.replace(/^http/, 'ws');
+
+  // 1. OPEN PERSISTENT EVENT-DRIVEN WEBSOCKET PIPE (WITH AUTO-RECONNECT)
   useEffect(() => {
     if (!token) return;
     
     let ws_bridge: WebSocket;
-    let reconnectTimeout: NodeJS.Timeout;
+    let reconnectTimeout: any; // Using any bypasses the NodeJS.Timeout compiler lock on cloud engines cleanly
 
     const connectStream = () => {
-      const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws_bridge = new WebSocket(`${ws_protocol}//${API_BASE_URL}${port_suffix}/api/market-stream`);
+      // ✅ Pristine structure: Clean continuous path using our pre-built WS URL configuration
+      ws_bridge = new WebSocket(`${WS_BASE_URL}/api/market-stream`);
 
       ws_bridge.onopen = () => {
         console.log("✅ TradePulse Backend Channel connected and streaming active.");
@@ -44,14 +50,11 @@ const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tr
 
       ws_bridge.onmessage = (event) => {
         const server_payload = JSON.parse(event.data);
-        
-        // Handle standard wrapped payload or fallback to direct arrays
         if (server_payload.type === 'SYSTEM_LOCK') {
           setIsSystemLocked(true);
         } else if (server_payload.type === 'MARKET_DATA') {
           setMarketTicks(server_payload.payload);
         } else if (Array.isArray(server_payload)) {
-          // Fallback catch-all to make sure direct streams populate ticks instantly
           setMarketTicks(server_payload);
         }
       };
@@ -80,9 +83,8 @@ const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tr
   useEffect(() => {
     if (!token) return;
     
-    const http_protocol = window.location.protocol;
-    
-    fetch(`${http_protocol}//${API_BASE_URL}${port_suffix}/api/risk/update-drawdown`, {
+    // ✅ Clean structure: Directly references the base URL without prefix collisions
+    fetch(`${API_BASE_URL}/api/risk/update-drawdown`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
