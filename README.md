@@ -221,16 +221,16 @@ The UI dashboard runs at **`http://localhost:5173`**.
 
 ### Risk Allocation Engine (Mathematical Model)
 
-To defend capital from excessive risk, the platform calculates maximum order sizing dynamically. The maximum allowed volume is computed as follows:
+To defend capital from excessive risk, the platform calculates maximum order sizing dynamically. The relationship between total capital, stop loss, and entry parameters is defined by:
 
-$$V_{max} = \frac{C_{total} \times R_{\%}}{P_{entry} - P_{stop\_loss}}$$
+$$V_{\text{max}} = \frac{C_{\text{total}} \times R_{\text{pct}}}{P_{\text{entry}} - P_{\text{stop}}}$$
 
 Where:
-- $V_{max}$ is the maximum permissible share volume (rounded down to the nearest integer).
-- $C_{total}$ is the total account capital.
-- $R_{\%}$ is the target risk percentage (e.g., $0.015$ represents $1.5\%$ risk per trade).
-- $P_{entry}$ is the target entry price.
-- $P_{stop\_loss}$ is the defense invalidation price.
+- $V_{\text{max}}$ is the maximum permissible share volume (rounded down to the nearest integer).
+- $C_{\text{total}}$ represents total available trading capital.
+- $R_{\text{pct}}$ is the target risk percentage as a decimal fraction (e.g., $0.015$ represents $1.5\%$ risk per trade).
+- $P_{\text{entry}}$ is the custom entry price per unit.
+- $P_{\text{stop}}$ is the defense invalidation stop-loss price per unit.
 
 ### Deterministic Token Extraction & Security Overhaul
 
