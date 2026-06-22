@@ -1,0 +1,56 @@
+services:
+  # 1. DATABASE SERVICE CONTAINER (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: tradepulse_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tradepulse
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pulse_network
+
+  # 2. FASTAPI BACKEND CORE ENGINE
+  backend-engine:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tradepulse
+      - SECRET_KEY=b40a5a3a2e1d0c5a2c2b7f3299c855a9ee079a49f50e77d29bc62d04a796bc9d
+      - GEMINI_API_KEY # 🧠 Dynamically injected secure pipeline keys
+    depends_on:
+      - db
+    networks:
+      - pulse_network
+
+  # 3. VITE REACT FRONTEND DASHBOARD
+  frontend-dashboard:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules/
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Ensures instant hot-reloads execute smoothly inside Windows containers
+    depends_on:
+      - backend-engine
+    networks:
+      - pulse_network
+
+volumes:
+  postgres_data:
+
+networks:
+  pulse_network:
+    driver: bridge

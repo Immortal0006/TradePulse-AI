@@ -1,0 +1,18 @@
+# Local Node system caches
+node_modules/
+dist/
+.env
+
+# Database local storage cache (Tells Git to NEVER push your local database files)
+db_data/
+
+# Python system garbage files
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+env/
+
+# OS Specific junk
+.DS_Store
+Thumbs.db
