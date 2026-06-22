@@ -24,10 +24,12 @@ export default function RiskEngine({ token }: RiskEngineProps) {
     if (!token) return;
     
     const IS_PROD = import.meta.env.PROD;
-    const BACKEND_URL = IS_PROD ? window.location.hostname : 'localhost';
-    const HTTP_PORT = IS_PROD ? '' : ':8000';
     
-    fetch(`${window.location.protocol}//${BACKEND_URL}${HTTP_PORT}/api/analytics/risk-profile`, {
+    // 🎯 Establish our dynamic cross-origin target base
+    const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
+    
+    // ✅ Pristine dynamic routing straight to your real risk backend
+    fetch(`${API_BASE_URL}/api/analytics/risk-profile`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -92,11 +94,13 @@ export default function RiskEngine({ token }: RiskEngineProps) {
     setExecutionStatus(null);
 
     const IS_PROD = import.meta.env.PROD;
-    const BACKEND_URL = IS_PROD ? window.location.hostname : 'localhost';
-    const HTTP_PORT = IS_PROD ? '' : ':8000';
+    
+    // 🎯 Use clean dynamic routing directly
+    const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
 
     try {
-      const response = await fetch(`${window.location.protocol}//${BACKEND_URL}${HTTP_PORT}/api/orders/execute`, {
+      // ✅ Completely safe production connection endpoint
+      const response = await fetch(`${API_BASE_URL}/api/orders/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

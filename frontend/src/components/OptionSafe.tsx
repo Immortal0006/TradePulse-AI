@@ -18,15 +18,18 @@ export default function OptionSafe({ token }: OptionSafeProps) {
     setLoading(true);
     
     const IS_PROD = import.meta.env.PROD;
-    const BACKEND_URL = IS_PROD ? window.location.hostname : 'localhost';
-    const HTTP_PORT = IS_PROD ? '' : ':8000';
-    const PROTOCOL = window.location.protocol;
+    
+    // 🎯 Establish our dynamic cross-origin target base
+    const API_BASE_URL = IS_PROD 
+      ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
+      : 'http://localhost:8000';
 
-    fetch(`${PROTOCOL}//${BACKEND_URL}${HTTP_PORT}/api/analytics/option-safe`, {
+    // ✅ Pristine production-ready endpoint payload distribution
+    fetch(`${API_BASE_URL}/api/analytics/option-safe`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` // 🔒 Added Security Tokens
+        'Authorization': `Bearer ${token}` // 🔒 Secure authentication session block
       },
       body: JSON.stringify({ symbol, strike_price: strike, expiry_date: chosenExpiry })
     })

@@ -37,7 +37,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
   const fetchTrades = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/trades', {
+      const res = await fetch('${API_BASE_URL}/api/trades', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -69,7 +69,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     };
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/trades', {
+      const res = await fetch('${API_BASE_URL}/api/trades', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     if (!exitPriceInput || isNaN(Number(exitPriceInput)) || !token) return;
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/trades/${tradeId}`, {
+      const res = await fetch('${API_BASE_URL}/api/trades/${tradeId}', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     }));
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/journal/audit', {
+      const res = await fetch('${API_BASE_URL}/api/journal/audit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -18,10 +18,12 @@ export default function CostGuard({ token }: CostGuardProps) {
     if (!token) return;
     
     const IS_PROD = import.meta.env.PROD;
-    const BACKEND_URL = IS_PROD ? window.location.hostname : 'localhost';
-    const HTTP_PORT = IS_PROD ? '' : ':8000';
     
-    fetch(`${window.location.protocol}//${BACKEND_URL}${HTTP_PORT}/api/analytics/slippage`, {
+    // 🎯 Establish our dynamic cross-origin target base
+    const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
+    
+    // ✅ Clean structure targeting your real live quantitative slippage calculation engine
+    fetch(`${API_BASE_URL}/api/analytics/slippage`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
