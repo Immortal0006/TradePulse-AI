@@ -4,9 +4,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
-from sqlalchemy import Column, Integer, String, Float, DateTime
-from sqlalchemy.sql import func
-from database import Base
+
 class User(Base):
     __tablename__ = "users"
 

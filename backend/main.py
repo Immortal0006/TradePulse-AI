@@ -122,9 +122,13 @@ async def run_live_market_stream():
 async def lifespan(app: FastAPI):
     """Handles auto-migrations on initialization and cleans up worker state on teardown."""
     print("⚙️ Initializing Relational Storage Tables via Schema Blueprints...")
-    Base.metadata.create_all(bind=Engine)
+    try:
+        Base.metadata.create_all(bind=Engine)
+        print("✅ Database tables successfully mapped/verified.")
+    except Exception as db_err:
+        print(f"⚠️ Non-fatal table sync notice (tables likely exist already): {db_err}")
     
-    # Launch background market streaming task
+    # Launch background market streaming task safely
     stream_task = asyncio.create_task(run_live_market_stream())
     
     yield
