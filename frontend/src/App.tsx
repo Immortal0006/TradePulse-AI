@@ -23,10 +23,10 @@ export default function App() {
 
   // Detect if the app is live or running locally
   const IS_PROD = import.meta.env.PROD;
-  const BACKEND_URL = IS_PROD ? window.location.hostname : 'localhost';
-  const port_suffix = IS_PROD ? '' : ':8000';
 
- 
+// 🎯 Directly use your Render environment variable in production, fallback to local for dev
+const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
+
  // 1. OPEN PERSISTENT EVENT-DRIVEN WEBSOCKET PIPE (WITH AUTO-RECONNECT)
   useEffect(() => {
     if (!token) return;
@@ -36,7 +36,7 @@ export default function App() {
 
     const connectStream = () => {
       const ws_protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws_bridge = new WebSocket(`${ws_protocol}//${BACKEND_URL}${port_suffix}/api/market-stream`);
+      ws_bridge = new WebSocket(`${ws_protocol}//${API_BASE_URL}${port_suffix}/api/market-stream`);
 
       ws_bridge.onopen = () => {
         console.log("✅ TradePulse Backend Channel connected and streaming active.");
@@ -82,7 +82,7 @@ export default function App() {
     
     const http_protocol = window.location.protocol;
     
-    fetch(`${http_protocol}//${BACKEND_URL}${port_suffix}/api/risk/update-drawdown`, {
+    fetch(`${http_protocol}//${API_BASE_URL}${port_suffix}/api/risk/update-drawdown`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
