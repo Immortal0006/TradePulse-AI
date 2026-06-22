@@ -19,7 +19,7 @@ import yfinance as yf
 from fastapi.security import OAuth2PasswordRequestForm
 
 # SQLAlchemy Elements
-from database import engine as Engine, SessionLocal, Base, get_db
+from database import engine, SessionLocal, Base, get_db
 from models import User, Trade, Strategy  # Assuming your declarative models are structured here
 from auth import get_password_hash, verify_password, create_access_token, get_current_user
 
@@ -123,7 +123,7 @@ async def lifespan(app: FastAPI):
     """Handles auto-migrations on initialization and cleans up worker state on teardown."""
     print("⚙️ Initializing Relational Storage Tables via Schema Blueprints...")
     try:
-        Base.metadata.create_all(bind=Engine)
+        Base.metadata.create_all(bind=engine)
         print("✅ Database tables successfully mapped/verified.")
     except Exception as db_err:
         print(f"⚠️ Non-fatal table sync notice (tables likely exist already): {db_err}")
