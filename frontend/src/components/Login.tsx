@@ -36,8 +36,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
         bodyData = JSON.stringify({ email, password });
         headers['Content-Type'] = 'application/json';
       }
-
-      const res = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+      const IS_PROD = import.meta.env.PROD;
+      const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
+      
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: headers,
         body: bodyData,
