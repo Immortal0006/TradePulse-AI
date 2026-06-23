@@ -1,6 +1,3 @@
-Edited find_endpoints.py
-Ran command: `python C:\Users\udcon\.gemini\antigravity\brain\1e4c2481-2d1c-4023-ac66-dcea3766d491\scratch\find_endpoints.py`
-
 <p align="center">
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React 18" />
   <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
