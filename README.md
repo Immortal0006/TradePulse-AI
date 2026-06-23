@@ -13,6 +13,14 @@
 
 ---
 
+## 🔗 Production Links
+
+- **Live Web Application UI:** [https://trade-pulse-ai-gamma.vercel.app/](https://trade-pulse-ai-gamma.vercel.app/)
+- **Live Backend API Gateway:** [https://tradepulse-backend-2533.onrender.com/](https://tradepulse-backend-2533.onrender.com/)
+- **Interactive API Documentation:** [https://tradepulse-backend-2533.onrender.com/docs](https://tradepulse-backend-2533.onrender.com/docs)
+
+---
+
 ## 📖 Table of Contents
 
 - [Overview](#overview)
@@ -22,8 +30,7 @@
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
+  - [Local Sandbox Setup](#local-sandbox-setup)
 - [How It Works](#how-it-works)
   - [Risk Allocation Engine (Mathematical Model)](#risk-allocation-engine-mathematical-model)
   - [Deterministic Token Extraction & Security Overhaul](#deterministic-token-extraction--security-overhaul)
@@ -53,12 +60,12 @@ TradePulse AI bridges the gap between discretionary trading workflows and quanti
 
 | Feature | Description |
 | :--- | :--- |
-| **📊 The Risk Engine** | Dynamically calculates maximum permissible share volumes using custom risk-per-share bounds. Automatically resets inputs on transaction success. |
+| **📊 Risk Engine** | Dynamically calculates maximum permissible share volumes using custom risk-per-share bounds. Automatically resets inputs on transaction success and features session lockout thresholds. |
 | **🤖 AI Copilot & Analyzer** | Context-aware setup auditor providing real-time trend mapping, qualitative risk scoring, and momentum vector validation. |
-| **🔔 Integrated Watchlist** | Multi-asset tracking deck monitoring real-time regional tickers and immediate institutional liquidity pools. |
-| **🛡️ CostGuard Engine** | Audits transactional drag (brokerage, taxes, clearing, and slippage) to establish the absolute net-breakeven threshold. |
-| **🔒 OptionSafe Matrix** | Specialized options strategy workbench assessing portfolio Greeks ($\Delta$, $\Gamma$, $\Theta$, $Vega$) and tail-risk liquidation barriers. |
-| **📝 Trade Journal Ledger** | High-density historical audit tables dynamically mapping active/closed positions, action vectors (BUY/SELL), and environment tags (SIMULATED/LIVE). |
+| **🔔 Watchlist** | Multi-asset tracking deck monitoring real-time regional tickers and immediate institutional liquidity pools. |
+| **🛡️ Cost Guard** | Audits transactional drag (brokerage, taxes, clearing, and slippage) to establish the absolute net-breakeven threshold. |
+| **🔒 Option Safe** | Specialized options strategy workbench assessing portfolio Greeks ($\Delta$, $\Gamma$, $\Theta$, $Vega$) and tail-risk liquidation barriers. |
+| **📝 Trade Journal** | High-density historical audit tables dynamically mapping active/closed positions, action vectors (BUY/SELL), and environment tags (SIMULATED/LIVE). |
 
 ---
 
@@ -181,39 +188,37 @@ TradePulse-AI/
 - **Node.js 18+**
 - **PostgreSQL 16** (or Docker)
 
-### Backend Setup
+### Local Sandbox Setup
 
+#### 1. Backend Engine
 ```bash
-# 1. Navigate to the backend directory
+# Navigate to the backend directory
 cd backend
 
-# 2. Configure a virtual environment
+# Configure a virtual environment
 python -m venv venv
 source venv/bin/activate  # On Windows use: venv\Scripts\activate
 
-# 3. Install core dependencies
+# Install core dependencies
 pip install -r requirements.txt
 
-# 4. Spin up the FastAPI server
+# Spin up the FastAPI local dev server
 uvicorn main:app --reload --port 8000
 ```
+Local API available at: **`http://localhost:8000`** (Swagger docs at `/docs`)
 
-The backend server runs at **`http://localhost:8000`**. You can view the API documentation at `http://localhost:8000/docs`.
-
-### Frontend Setup
-
+#### 2. Frontend Interface
 ```bash
-# 1. Navigate to the frontend directory
+# Navigate to the frontend directory
 cd frontend
 
-# 2. Install package dependencies
+# Install package dependencies
 npm install
 
-# 3. Spin up the local development server
+# Spin up the local development server
 npm run dev
 ```
-
-The UI dashboard runs at **`http://localhost:5173`**.
+Local interface available at: **`http://localhost:5173`**
 
 ---
 
@@ -323,7 +328,7 @@ export const RiskEngine: React.FC = () => {
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/orders/execute', {
+      const response = await fetch('https://tradepulse-backend-2533.onrender.com/api/orders/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol: ticker, entry_price: entryPrice, stop_loss: stopLoss })
@@ -354,10 +359,12 @@ export const RiskEngine: React.FC = () => {
 
 The TradePulse AI dashboard is organized into functional zones:
 
-- **The Risk Engine Panel (Left):** Input account sizing parameters, risk percentages, entry benchmarks, and stop-loss targets. The form displays real-time calculated volumes and auto-resets on success.
-- **AI Copilot Sidebar (Right):** Tracks the current active setup. It flags trend configurations, highlights momentum directions, and calculates reward-to-risk ratios.
-- **OptionSafe Matrix (Bottom Left):** Lists option portfolio exposure metrics, including Delta ($\Delta$), Gamma ($\Gamma$), Theta ($\Theta$), and Vega. Highlights tail-risk limits near liquidation barrier margins.
-- **Trade Journal History Ledger (Bottom Right):** Display active and closed historical records. Uses green tags for **BUY** directions, red tags for **SELL** directions, and tags environments as **LIVE** or **SIMULATED**.
+- **Risk Engine:** Input account capital, risk percent, entry price, and stop-loss. Computes total position size, risk exposure, and maximum shares. Auto-locks if risk rules are violated.
+- **AI Risk Translator Panel:** Generates live structural risk explanations using Gemini risk models.
+- **Cost Guard:** Evaluates slippage thresholds, fee audits, and breakeven offsets.
+- **Option Safe:** Scans options matrices, monitors margin boundaries, and tracks options Greeks ($\Delta$, $\Gamma$, $\Theta$, $Vega$).
+- **Trade Journal:** Features a Mindset Auditor where users commit position entries alongside behavioral tags (e.g., `DISCIPLINED`).
+- **Watchlist:** Real-time stream of ticks and institutional order sizes.
 
 ---
 
@@ -366,7 +373,7 @@ The TradePulse AI dashboard is organized into functional zones:
 ### Endpoint
 
 ```
-POST /api/v1/orders/execute
+POST https://tradepulse-backend-2533.onrender.com/api/orders/execute
 ```
 
 ### Request Headers
@@ -414,7 +421,7 @@ Content-Type: application/json
 ---
 
 ## Contributing
-
+* We welcome contributions! Please fork the repo, create a feature branch, and submit a PR.
 1. **Fork** the repository
 2. **Create** your feature branch (`git checkout -b feature/AmazingFeature`)
 3. **Commit** your changes (`git commit -m 'feat: Add some AmazingFeature'`)
