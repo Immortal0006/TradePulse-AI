@@ -13,7 +13,7 @@ export default function CostGuard({ token }: CostGuardProps) {
   const [liquidityProfile, setLiquidityProfile] = useState<'Deep' | 'Average' | 'Thin'>('Average');
   const [backendMetrics, setBackendMetrics] = useState<any>(null);
 
-  // Hook up your local variables directly to the backend engine pipeline
+  // Hook up your local variables directly to the updated backend engine pipeline
   useEffect(() => {
     if (!token) return;
     
@@ -22,8 +22,11 @@ export default function CostGuard({ token }: CostGuardProps) {
     // 🎯 Establish our dynamic cross-origin target base
     const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
     
-    // ✅ Clean structure targeting your real live quantitative slippage calculation engine
-    fetch(`${API_BASE_URL}/api/analytics/slippage`, {
+    // Translate UI profile names to API standard names
+    const apiProfile = liquidityProfile === 'Deep' ? 'HIGH' : liquidityProfile === 'Average' ? 'MEDIUM' : 'LOW';
+
+    // ✅ Targets your newly optimized advanced market impact analytics endpoint
+    fetch(`${API_BASE_URL}/api/analytics/cost-guard`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,12 +34,19 @@ export default function CostGuard({ token }: CostGuardProps) {
       },
       body: JSON.stringify({
         quantity: qty,
-        base_price: askPrice,
-        profile: liquidityProfile
+        symbol: "SBIN.NS", // Using placeholder symbol for general baseline routing
+        liquidity_profile: apiProfile
       })
     })
-    .then(res => res.json())
-    .then(data => setBackendMetrics(data))
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      if (data.status === 'SUCCESS') {
+        setBackendMetrics(data.metrics);
+      }
+    })
     .catch(err => console.error("Slippage pipeline execution fault:", err));
   }, [qty, askPrice, liquidityProfile, token]);
 
@@ -57,10 +67,11 @@ export default function CostGuard({ token }: CostGuardProps) {
     return data;
   }, [qty, askPrice, liquidityProfile]);
 
-  const displayFill = backendMetrics?.average_fill_price || askPrice;
-  const displaySlippage = backendMetrics?.hidden_slippage_cost || 0.00;
-  const displayDivergence = backendMetrics?.vwap_divergence_pct || 0.00;
-  const displayAnchor = backendMetrics?.session_vwap_anchor || askPrice;
+  // Map backend response attributes to variables with explicit defaults
+  const displayFill = backendMetrics?.simulated_fill_price || askPrice;
+  const displaySlippage = backendMetrics?.total_liquidity_slippage_cost || 0.00;
+  const displayDivergence = backendMetrics?.slippage_percentage || 0.00;
+  const displayDegradationPerUnit = backendMetrics?.price_degradation_per_unit || 0.00;
 
   return (
     <div className="space-y-6 max-w-6xl animate-fadeIn">
@@ -105,7 +116,7 @@ export default function CostGuard({ token }: CostGuardProps) {
             <div>
               <strong className="block text-white mb-0.5 uppercase tracking-wider text-[10px]">Execution Verdict:</strong>
               {displayDivergence > 0.35 
-                ? "WARNING: Severe VWAP Divergence detected by Core Engine. Slice order parameters using institutional block routing frameworks."
+                ? "WARNING: Severe Slippage Leakage detected by Core Engine. Slice order parameters using institutional block routing frameworks."
                 : "OPTIMAL: Market depth is sufficient to absorb this block size with minimal execution penalty."}
             </div>
           </div>
@@ -115,19 +126,19 @@ export default function CostGuard({ token }: CostGuardProps) {
         <div className="lg:col-span-2 space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">Average Fill Price</span>
+              <span className="block text-[9px] text-gray-500 font-bold uppercase">Simulated Fill Price</span>
               <span className="text-lg font-black text-white mt-1 block">₹{displayFill}</span>
             </div>
             <div className="bg-[#10141f] border border-rose-500/20 p-4 rounded-xl font-mono text-center shadow-lg relative">
               <span className="block text-[9px] text-gray-400 font-bold uppercase">Slippage Leakage</span>
-              <span className="text-lg font-black text-rose-400 mt-1 block">₹{displaySlippage}</span>
+              <span className="text-lg font-black text-rose-400 mt-1 block">₹{displaySlippage.toLocaleString()}</span>
             </div>
             <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">Session VWAP Anchor</span>
-              <span className="text-lg font-black text-amber-400 mt-1 block">₹{displayAnchor}</span>
+              <span className="block text-[9px] text-gray-500 font-bold uppercase">Degradation/Unit</span>
+              <span className="text-lg font-black text-amber-400 mt-1 block">₹{displayDegradationPerUnit}</span>
             </div>
             <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">VWAP Divergence</span>
+              <span className="block text-[9px] text-gray-500 font-bold uppercase">Slippage Deviation</span>
               <span className="text-lg font-black text-purple-400 mt-1 block">+{displayDivergence}%</span>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, ShieldAlert, BadgeInfo, NotebookTabs, SlidersHorizontal, Layers, Calculator, LogOut } from 'lucide-react';
+import { Activity, ShieldAlert, BadgeInfo, NotebookTabs, SlidersHorizontal, Layers, Calculator, LogOut, Cpu } from 'lucide-react';
 
 // Import our modular dashboard feature panels
 import Watchlist from './components/Watchlist';
@@ -8,13 +8,14 @@ import OptionSafe from './components/OptionSafe';
 import TradeJournal from './components/TradeJournal';
 import RiskEngine from './components/RiskEngine';
 import { Login } from './components/Login';
+import StrategyHub from './components/StrategyHub'; 
 
 export default function App() {
   // Session Authentication Persistence Layer
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   
-  // Navigation Routing States
-  const [activeTab, setActiveTab] = useState<'watchlist' | 'cost' | 'option' | 'journal' | 'risk'>('watchlist');
+  // Navigation Routing States (🎯 Expanded with 'strategy')
+  const [activeTab, setActiveTab] = useState<'watchlist' | 'cost' | 'option' | 'journal' | 'risk' | 'strategy'>('watchlist');
   
   // Memory Caches tracking background WebSocket payload items
   const [marketTicks, setMarketTicks] = useState<any[]>([]);
@@ -22,7 +23,6 @@ export default function App() {
   const [simulatedLoss, setSimulatedLoss] = useState<number>(0);
 
   // Detect if the app is live or running locally
-// Detect if the app is live or running locally
   const IS_PROD = import.meta.env.PROD;
 
   // 🎯 Dynamic Base HTTP URL setup
@@ -38,10 +38,9 @@ export default function App() {
     if (!token) return;
     
     let ws_bridge: WebSocket;
-    let reconnectTimeout: any; // Using any bypasses the NodeJS.Timeout compiler lock on cloud engines cleanly
+    let reconnectTimeout: any; 
 
     const connectStream = () => {
-      // ✅ Pristine structure: Clean continuous path using our pre-built WS URL configuration
       ws_bridge = new WebSocket(`${WS_BASE_URL}/api/market-stream`);
 
       ws_bridge.onopen = () => {
@@ -77,13 +76,12 @@ export default function App() {
       if (ws_bridge) ws_bridge.close();
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
-  }, [token]);
+  }, [token, WS_BASE_URL]);
 
   // 2. SAFETY LOCK CONTROL: BROADCAST SIMULATED PNL METRICS
   useEffect(() => {
     if (!token) return;
     
-    // ✅ Clean structure: Directly references the base URL without prefix collisions
     fetch(`${API_BASE_URL}/api/risk/update-drawdown`, {
       method: 'POST',
       headers: { 
@@ -99,7 +97,7 @@ export default function App() {
       }
     })
     .catch(err => console.error("Risk Engine unreachable:", err));
-  }, [simulatedLoss, token]);
+  }, [simulatedLoss, token, API_BASE_URL]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -162,6 +160,18 @@ export default function App() {
             <button onClick={() => setActiveTab('journal')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'journal' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
               <NotebookTabs className="w-4 h-4" /> Trade Journal
             </button>
+            
+            {/* 🎯 SIDEBAR LINK CONNECTING STRATEGY ENGINE */}
+            <button 
+              onClick={() => setActiveTab('strategy')} 
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+                activeTab === 'strategy' 
+                  ? 'bg-purple-950/40 text-purple-400 border border-purple-500/20 shadow-md' 
+                  : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'
+              }`}
+            >
+              <Cpu className="w-4 h-4 text-purple-400" /> Strategy Hub
+            </button>
           </nav>
         </div>
  
@@ -194,16 +204,16 @@ export default function App() {
       </aside>
 
       {/* DYNAMIC COMPONENT PANEL CANVAS ACTION CONTENT SPACE */}
-<main className="flex-1 p-8 overflow-y-auto bg-[#090b0f]">
-  {activeTab === 'watchlist' && <Watchlist marketTicks={marketTicks} />}
-  {activeTab === 'cost' && <CostGuard token={token} />}     
-  {activeTab === 'option' && <OptionSafe token={token} />}   
-  
-  {/* ⚡ Wrapped securely inside curly brackets instead of a raw line statement! */}
-  {activeTab === 'risk' && <RiskEngine token={token} />}
-  
-  {activeTab === 'journal' && <TradeJournal token={token} />}
-</main>
+      <main className="flex-1 p-8 overflow-y-auto bg-[#090b0f]">
+        {activeTab === 'watchlist' && <Watchlist marketTicks={marketTicks} />}
+        {activeTab === 'cost' && <CostGuard token={token} />}     
+        {activeTab === 'option' && <OptionSafe token={token} />}   
+        {activeTab === 'risk' && <RiskEngine token={token} />}
+        {activeTab === 'journal' && <TradeJournal token={token} />}
+        
+        {/* 🎯 MOUNT STRATEGY ENGINE HERE */}
+        {activeTab === 'strategy' && <StrategyHub token={token} />}
+      </main>
     </div>
   );
 }

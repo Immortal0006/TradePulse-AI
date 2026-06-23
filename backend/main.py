@@ -72,9 +72,15 @@ class TradeResponse(BaseModel):
     behavioral_tag: str
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+class StrategyCreatePayload(BaseModel):
+        name: str
+        description: Optional[str] = None
+        rules_configuration: Optional[dict] = None  # Flexible JSON/Dict mapping to JSONB
 
+class Config:
+    from_attributes = True
+        
+    
 # -------------------------------------------------------------------------
 # LIFECYCLE LIFESPAN & BACKGROUND TASK ROUTINES
 # -------------------------------------------------------------------------
@@ -185,17 +191,21 @@ def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db = Depends(ge
         
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
 @app.get("/api/users/me")
 def read_current_user_profile(current_user: User = Depends(get_current_user)):
     return {"id": str(current_user.id), "email": current_user.email, "is_active": current_user.is_active}
 
-# 1. Update the schema definition to be hyper-flexible with types
+
+# -------------------------------------------------------------------------
+# ORDER EXECUTION & INTEGRATED PERSISTENT JOURNAL LEDGER
+# -------------------------------------------------------------------------
 class OrderExecutionRequest(BaseModel):
     symbol: str
     type: str
-    quantity: float              # ⚡ Changed from int to float to safely handle any incoming JS numbers
+    quantity: float            # ⚡ Handled flexibly from frontend
     entry_price: float
-    stop_loss: Optional[float] = None     # ⚓ Ensure these are cleanly wrapped as Optional
+    stop_loss: Optional[float] = None     
     take_profit: Optional[float] = None
     is_paper_trade: Optional[bool] = True
 
@@ -203,11 +213,11 @@ class OrderExecutionRequest(BaseModel):
 def execute_order(
     payload: OrderExecutionRequest, 
     db: Session = Depends(get_db),
-    authorization: str = Header(None) # 🔒 Grab the raw header string directly!
+    authorization: str = Header(None)
 ):
     """
-    Direct institutional settlement checkpoint with manual header verification
-    to completely bypass dependency injection mismatch traps.
+    Direct institutional settlement checkpoint with manual header verification.
+    Bypasses dependency injection traps and maps entries straight into SQL tables.
     """
     credentials_exception = HTTPException(
         status_code=401,
@@ -215,9 +225,7 @@ def execute_order(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    # 1. Manually parse and verify the Authorization Header
     if not authorization or not authorization.startswith("Bearer "):
-        print("🛑 Auth Header missing or improperly formatted:", authorization)
         raise credentials_exception
         
     token = authorization.split(" ")[1]
@@ -229,7 +237,6 @@ def execute_order(
         raise HTTPException(status_code=400, detail="Execution volume must be greater than zero shares.")
     
     try:
-        # Decode the token exactly like auth.py does
         decoded_payload = jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = decoded_payload.get("sub")
         if email is None:
@@ -238,16 +245,12 @@ def execute_order(
         print("🛑 JWT Decode manual failure:", str(jwt_err))
         raise credentials_exception
         
-    # 2. Fetch the user from the database
     current_user = db.query(User).filter(User.email == email).first()
     if current_user is None:
         raise credentials_exception
 
-    # 3. Proceed with the trade execution securely
-    if payload.quantity <= 0:
-        raise HTTPException(status_code=400, detail="Execution volume must be greater than zero shares.")
-    
     try:
+        # 🎯 Synchronizing order placements directly with your relational schema constraints
         new_trade = Trade(
             user_id=current_user.id, 
             symbol=payload.symbol.strip().upper(),
@@ -258,6 +261,7 @@ def execute_order(
             take_profit=payload.take_profit,
             status="OPEN",
             is_paper_trade=payload.is_paper_trade,
+            realized_pnl=0.0,
             behavioral_tag="DISCIPLINED"
         )
         
@@ -268,21 +272,20 @@ def execute_order(
         return {
             "status": "SUCCESS",
             "message": f"Flawlessly deployed position size for {payload.symbol}.",
-            "trade_id": new_trade.id,
+            "trade_id": str(new_trade.id),
             "allocated_capital": float(payload.entry_price * payload.quantity)
         }
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Execution block transactional fault: {str(e)}")
-# -------------------------------------------------------------------------
-# RELATIONAL DATABASE CRUDS: TRANSACTIONAL JOURNAL LEDGER
-# -------------------------------------------------------------------------
+
+
 @app.post("/api/trades", response_model=TradeResponse)
 def log_new_trade(trade_data: TradeCreate, db = Depends(get_db), current_user: User = Depends(get_current_user)):
     db_trade = Trade(
         user_id=current_user.id,
         symbol=trade_data.symbol.strip().upper(),
-        type=trade_data.type,
+        type=trade_data.type.upper(),
         quantity=trade_data.quantity,
         entry_price=trade_data.entry_price,
         stop_loss=trade_data.stop_loss,
@@ -311,7 +314,7 @@ def modify_or_close_trade_record(trade_id: str, payload: dict = Body(...), db = 
     if "exit_price" in payload:
         trade_record.exit_price = float(payload["exit_price"])
         trade_record.status = "CLOSED"
-        # Calculate standard directional realized PnL calculations
+        # Calculate directional realized metrics
         multiplier = 1 if trade_record.type.upper() == "BUY" else -1
         trade_record.realized_pnl = (trade_record.exit_price - trade_record.entry_price) * trade_record.quantity * multiplier
         
@@ -329,13 +332,9 @@ def modify_or_close_trade_record(trade_id: str, payload: dict = Body(...), db = 
 # -------------------------------------------------------------------------
 @app.websocket("/api/market-stream")
 async def market_data_stream(websocket: WebSocket):
-    """
-    Handles the persistent high-fidelity market data streaming channel,
-    pushing live ticking matrix price points over a secure protocol.
-    """
+    """Handles the persistent real-time streaming channel for live prices."""
     await websocket.accept()
     
-    # Track core tickers to broadcast matching your grid view layout
     monitored_tickers = [
         {"symbol": "SBIN.NS", "name": "State Bank of India", "base": 842.15},
         {"symbol": "RELIANCE.NS", "name": "Reliance Industries Ltd", "base": 2945.60},
@@ -347,7 +346,6 @@ async def market_data_stream(websocket: WebSocket):
         while True:
             updated_ticks = []
             for ticker in monitored_tickers:
-                # Inject a minor realistic micro-variance fluctuation to simulation price actions
                 pct_change = random.uniform(-0.002, 0.003)
                 ticker["base"] = round(ticker["base"] * (1 + pct_change), 2)
                 
@@ -362,38 +360,104 @@ async def market_data_stream(websocket: WebSocket):
                     "timestamp": "Live"
                 })
             
-            # Broadcast payload downstream over the open connection frame
             await websocket.send_json({
                 "type": "MARKET_DATA",
                 "payload": updated_ticks
             })
             
-            # Ticker interval loop pace (every 2 seconds)
             await asyncio.sleep(2.0)
             
     except WebSocketDisconnect:
         print("💡 Surveillance Node Channel disconnected cleanly from client framework.")
     except Exception as e:
         print(f"⚠️ Stream anomaly detected: {str(e)}")
+
 # -------------------------------------------------------------------------
 # ANALYTICS & RISK MICROSERVICES ENDPOINTS
 # -------------------------------------------------------------------------
 @app.post("/api/analytics/cost-guard")
 async def check_cost_guard_parameters(payload: dict = Body(...)):
+    """Advanced market impact engine tracking transaction size degradation vectors."""
     order_qty = int(payload.get("quantity", 100))
     target_symbol = payload.get("symbol", "SBIN.NS")
+    liquidity_tier = payload.get("liquidity_profile", "HIGH").upper()
+    
     cached_stock = LIVE_WATCHLIST_CACHE.get(target_symbol)
-    best_ask_baseline = cached_stock["price"] if cached_stock else 820.00
-    return calculate_order_book_slippage(order_qty, best_ask_baseline)
+    base_price = cached_stock["price"] if cached_stock else 820.00
+    
+    # 📉 Assign quantitative liquidity impact bounds
+    if liquidity_tier == "HIGH":
+        impact_factor = 0.00001
+    elif liquidity_tier == "MEDIUM":
+        impact_factor = 0.00005
+    else:
+        impact_factor = 0.00025
+        
+    estimated_slippage_pct = (order_qty ** 0.5) * impact_factor
+    price_degradation = base_price * estimated_slippage_pct
+    simulated_fill = base_price + price_degradation
+    total_impact_cost = order_qty * price_degradation
+    
+    return {
+        "status": "SUCCESS",
+        "metrics": {
+            "slippage_percentage": round(estimated_slippage_pct * 100, 4),
+            "price_degradation_per_unit": round(price_degradation, 2),
+            "simulated_fill_price": round(simulated_fill, 2),
+            "total_liquidity_slippage_cost": round(total_impact_cost, 2)
+        }
+    }
 
 @app.post("/api/analytics/option-safe")
 async def evaluate_option_premium_risk(payload: dict = Body(...)):
-    """Interfaces with live exchange options chains to extract true contract variables."""
+    """Computes advanced OptionSafe parameters including quantitative Theta premium decay analysis."""
     target_symbol = payload.get("symbol", "SBIN.NS").strip().upper()
     strike_input = float(payload.get("strike_price", 820.0))
     expiry_input = payload.get("expiry_date", None)
     
-    return fetch_real_option_metrics(target_symbol, strike_input, expiry_input)
+    # Fallback date tracking model if no input provided
+    if not expiry_input:
+        expiry_input = (datetime.now(timezone.utc) + timedelta(days=7)).strftime("%Y-%m-%d")
+        
+    try:
+        today = datetime.now(timezone.utc).date()
+        expiry = datetime.strptime(expiry_input, "%Y-%m-%d").date()
+        days_to_expiry = (expiry - today).days
+        
+        # Pull baseline metrics from underlying file layer
+        base_metrics = fetch_real_option_metrics(target_symbol, strike_input, expiry_input)
+        
+        if days_to_expiry <= 0:
+            base_metrics["risk_profile_classification"] = "EXPIRED"
+            base_metrics["theta_daily_decay_value"] = 0.0
+            return base_metrics
+            
+        # 🧮 Compute premium risk decay curves (Theta accelerates exponentially near expiration)
+        base_iv = 0.22 
+        estimated_theta = (base_iv * strike_input) / (2 * (days_to_expiry ** 0.5) * 365)
+        
+        risk_level = "SAFE"
+        if days_to_expiry < 3:
+            risk_level = "CRITICAL_DECAY"
+        elif days_to_expiry < 7:
+            risk_level = "WARNING_ELEVATED"
+            
+        base_metrics["days_remaining"] = days_to_expiry
+        base_metrics["risk_profile_classification"] = risk_level
+        base_metrics["theta_daily_decay_value"] = round(estimated_theta, 2)
+        base_metrics["overnight_holding_risk_loss"] = round(estimated_theta * 1.5, 2)
+        
+        return base_metrics
+    except Exception as e:
+        # Graceful fallback to simulated values if service layer runs out of network boundaries
+        return {
+            "status": "SIMULATED",
+            "symbol": target_symbol,
+            "days_remaining": 5,
+            "risk_profile_classification": "WARNING_ELEVATED",
+            "theta_daily_decay_value": 1.45,
+            "overnight_holding_risk_loss": 2.18
+        }
 
 @app.post("/api/risk/update-drawdown")
 async def update_session_drawdown_metrics(payload: dict = Body(...)):
@@ -419,6 +483,30 @@ async def process_custom_stock_search(payload: dict = Body(...)):
         return {"status": "ERROR", "reason": "No query token provided."}
         
     return analyze_custom_ticker(target_ticker)
+
+
+@app.post("/api/strategies")
+def create_custom_strategy(payload: StrategyCreatePayload, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        new_strategy = Strategy(
+            user_id=current_user.id,
+            name=payload.name,
+            description=payload.description,
+            rules_config=payload.rules_configuration or {} # Maps straight to your table database structure
+        )
+        db.add(new_strategy)
+        db.commit()
+        db.refresh(new_strategy)
+        return {"status": "SUCCESS", "strategy": {"id": new_strategy.id, "name": new_strategy.name}}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create strategy configuration: {str(e)}")
+
+@app.get("/api/strategies")
+def get_user_strategies(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    # Pull all custom setups created by this active authenticated user
+    strategies = db.query(Strategy).filter(Strategy.user_id == current_user.id).all()
+    return {"status": "SUCCESS", "strategies": strategies}
 
 if __name__ == "__main__":
     import uvicorn

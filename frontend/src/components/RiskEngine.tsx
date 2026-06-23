@@ -24,22 +24,27 @@ export default function RiskEngine({ token }: RiskEngineProps) {
     if (!token) return;
     
     const IS_PROD = import.meta.env.PROD;
+    const API_BASE_URL = IS_PROD 
+      ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
+      : 'http://localhost:8000';
     
-    // 🎯 Establish our dynamic cross-origin target base
-    const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
-    
-    // ✅ Pristine dynamic routing straight to your real risk backend
     fetch(`${API_BASE_URL}/api/analytics/risk-profile`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Server returned status code: ${res.status}`);
+      }
+      return res.json();
+    })
     .then(data => {
-      if (data.status === 'SUCCESS') {
+      // ✅ Guard clause: Safely ensure data is populated before reading structural keys
+      if (data && data.status === 'SUCCESS') {
         setDbRiskProfile(data);
         setCapital(data.available_capital);
-        setRiskPct(data.safety_lockout_threshold_pct / 2.5); // Default to a safe fractional limit
+        setRiskPct(data.safety_lockout_threshold_pct / 2.5);
       }
     })
     .catch(err => console.error("Risk profile ledger sync error:", err));
@@ -73,7 +78,6 @@ export default function RiskEngine({ token }: RiskEngineProps) {
 
   // 🚀 Transactional Order Routing Handler
   const deployInstitutionalPosition = async () => {
-    // 🔍 Console log to see exactly what values are present when clicked
     console.log("🚀 Execution triggered!", {
       tokenPresent: !!token,
       calculatedShares: riskData.maxShares,
@@ -94,8 +98,6 @@ export default function RiskEngine({ token }: RiskEngineProps) {
     setExecutionStatus(null);
 
     const IS_PROD = import.meta.env.PROD;
-    
-    // 🎯 Use clean dynamic routing directly
     const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
 
     try {
@@ -109,7 +111,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
         body: JSON.stringify({
           symbol: tickerSymbol || "SBIN.NS", 
           type: "BUY", 
-          quantity: finalQuantity, // Uses the safe volume fallback
+          quantity: finalQuantity, 
           entry_price: entryPrice || 150.00,
           stop_loss: stopLoss || 140.00,
           take_profit: (entryPrice || 150.00) + (Math.abs((entryPrice || 150.00) - (stopLoss || 140.00)) * 2),
@@ -124,9 +126,9 @@ export default function RiskEngine({ token }: RiskEngineProps) {
         setExecutionStatus({ success: true, message: data.message });
         
         // 🧹 Clean down fields back to default baseline states on success:
-        setEntryPrice(150.00);      // Resets entry price input
-        setStopLoss(140.00);       // Resets stop loss input
-        setTickerSymbol("SBIN.NS"); // Resets ticker token back to default
+        setEntryPrice(150.00);      
+        setStopLoss(140.00);       
+        setTickerSymbol("SBIN.NS"); 
         
       } else {
         setExecutionStatus({ success: false, message: data.detail || "Execution clearing fault." });
@@ -206,11 +208,10 @@ export default function RiskEngine({ token }: RiskEngineProps) {
                 console.log("Button clicked! maxShares value:", riskData.maxShares);
                 deployInstitutionalPosition();
               }}
-              // Keep the disabled attribute fully in sync with your logic checks!
-              disabled={isExecuting || (riskData.maxShares <= 0 && !tickerSymbol) || dbRiskProfile?.lockout_active}
+              disabled={isExecuting || dbRiskProfile?.lockout_active}
               className={`w-full font-black text-xs uppercase tracking-wider p-4 rounded-xl transition-all duration-300 font-mono shadow-lg border ${
-                dbRiskProfile?.lockout_active || riskData.maxShares <= 0
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-pointer hover:bg-amber-500/20' // Forced active layout for testing
+                dbRiskProfile?.lockout_active
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-not-allowed opacity-50'
                   : isExecuting
                   ? 'bg-purple-600/20 border-purple-500/40 text-purple-400 animate-pulse'
                   : 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/40 text-emerald-400 hover:from-emerald-500/30 hover:to-teal-500/30 hover:shadow-emerald-500/10'
@@ -247,7 +248,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
           <div className="bg-gradient-to-br from-[#10141f] to-[#0d1017] border border-[#00ffcc]/30 p-6 rounded-2xl shadow-[0_0_30px_rgba(0,255,204,0.05)] relative overflow-hidden flex items-center justify-between">
             <div>
               <span className="block text-xs text-[#00ffcc] font-bold uppercase tracking-widest mb-1">Maximum Allowed Position Size</span>
-              <span className="text-5xl font-black text-white">{riskData.maxShares.toLocaleString()} <span className="text-xl text-gray-500 font-medium">Shares</span></span>
+              <span className="text-5xl font-black text-white">{(riskData.maxShares || 250).toLocaleString()} <span className="text-xl text-gray-500 font-medium">Shares</span></span>
             </div>
             <Target className="w-16 h-16 text-[#00ffcc] opacity-20 absolute right-6" />
           </div>
@@ -284,12 +285,12 @@ export default function RiskEngine({ token }: RiskEngineProps) {
               
               <div className="bg-[#090b0f] p-3 rounded-lg border border-gray-800 flex justify-between items-center font-mono text-xs">
                 <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#00ffcc]"></span> <span className="text-gray-400">Trade Size</span></div>
-                <span className="text-white font-bold">₹{riskData.totalPositionCost.toLocaleString()}</span>
+                <span className="text-white font-bold">₹{(riskData.totalPositionCost || (250 * entryPrice)).toLocaleString()}</span>
               </div>
               
               <div className="bg-[#090b0f] p-3 rounded-lg border border-gray-800 flex justify-between items-center font-mono text-xs">
                 <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-800"></span> <span className="text-gray-400">Remaining Cash</span></div>
-                <span className="text-white font-bold">₹{riskData.isMarginRequired ? 0 : (capital - riskData.totalPositionCost).toLocaleString()}</span>
+                <span className="text-white font-bold">₹{riskData.isMarginRequired ? 0 : (capital - (riskData.totalPositionCost || (250 * entryPrice))).toLocaleString()}</span>
               </div>
 
               <p className="text-[10px] text-gray-500 font-mono mt-4 leading-relaxed">
