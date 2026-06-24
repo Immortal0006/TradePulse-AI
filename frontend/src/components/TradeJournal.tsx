@@ -1,5 +1,12 @@
+// frontend/src/components/TradeJournal.tsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { NotebookPen, BrainCircuit, Share2, XCircle } from 'lucide-react';
+import { NotebookPen, BrainCircuit, Share2, Cpu } from 'lucide-react';
+
+interface StrategyRelation {
+  id: string;
+  name: string;
+  description?: string;
+}
 
 interface Trade {
   id?: string;
@@ -16,6 +23,7 @@ interface Trade {
   journal_notes: string;
   behavioral_tag: string;
   created_at?: string;
+  strategy?: StrategyRelation; // 🎯 Linked strategy relation tracking block for v1.5
 }
 
 interface TradeJournalProps {
@@ -30,14 +38,23 @@ export default function TradeJournal({ token }: TradeJournalProps) {
   const [emotions, setEmotions] = useState('');
   
   const [journalHistory, setJournalHistory] = useState<Trade[]>([]);
-  const [auditResult, setAuditResult] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<any | null>(null); // 🧠 Expanded to accept structured matrix object
   const [loading, setLoading] = useState(false);
+
+  // v1.5 Strategy Matrix Synchronization States
+  const [availableStrategies, setAvailableStrategies] = useState<StrategyRelation[]>([]);
+  const [manualStrategyId, setManualStrategyId] = useState<string>('');
+
+  const IS_PROD = import.meta.env.PROD;
+  const API_BASE_URL = IS_PROD 
+    ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
+    : 'http://localhost:8000';
 
   // Synchronize component state ledger indices with PostgreSQL database records
   const fetchTrades = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('${API_BASE_URL}/api/trades', {
+      const res = await fetch(`${API_BASE_URL}/api/trades`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -47,11 +64,28 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     } catch (err) {
       console.error("Failed to fetch database transaction ledger:", err);
     }
-  }, [token]);
+  }, [token, API_BASE_URL]);
+
+  // Sync custom strategies for selector layout assignment injection
+  const fetchStrategies = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/strategies`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.status === 'SUCCESS') {
+        setAvailableStrategies(data.strategies || []);
+      }
+    } catch (err) {
+      console.error("Failed to map user strategies to journal selectors:", err);
+    }
+  }, [token, API_BASE_URL]);
 
   useEffect(() => {
     fetchTrades();
-  }, [fetchTrades]);
+    fetchStrategies();
+  }, [fetchTrades, fetchStrategies]);
 
   // Handle transaction persistence packet execution
   const commitToJournal = async (e: React.FormEvent) => {
@@ -65,11 +99,12 @@ export default function TradeJournal({ token }: TradeJournalProps) {
       entry_price: Number(price),
       is_paper_trade: true,
       journal_notes: emotions,
-      behavioral_tag: "DISCIPLINED"
+      behavioral_tag: "DISCIPLINED",
+      strategy_id: manualStrategyId || null // Link strategy parameter directly
     };
 
     try {
-      const res = await fetch('${API_BASE_URL}/api/trades', {
+      const res = await fetch(`${API_BASE_URL}/api/trades`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,6 +116,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
       if (res.ok) {
         setPrice('');
         setEmotions('');
+        setManualStrategyId('');
         fetchTrades(); // Force structural sync reload
       }
     } catch (err) {
@@ -94,7 +130,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     if (!exitPriceInput || isNaN(Number(exitPriceInput)) || !token) return;
 
     try {
-      const res = await fetch('${API_BASE_URL}/api/trades/${tradeId}', {
+      const res = await fetch(`${API_BASE_URL}/api/trades/${tradeId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,7 +155,6 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     setLoading(true);
     setAuditResult(null);
 
-    // Transform database ledger logs into matching parameters for the audit payload
     const historyPayload = journalHistory.map(t => ({
       symbol: t.symbol,
       action: t.type,
@@ -127,7 +162,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
     }));
 
     try {
-      const res = await fetch('${API_BASE_URL}/api/journal/audit', {
+      const res = await fetch(`${API_BASE_URL}/api/journal/audit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -138,7 +173,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
       
       if (res.ok) {
         const data = await res.json();
-        setAuditResult(data.audit);
+        setAuditResult(data);
       }
     } catch (err) {
       console.error("AI Analysis connection link timed out:", err);
@@ -164,7 +199,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-1">
                 <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Asset Code</label>
-                <select value={stock} onChange={(e) => setStock(e.target.value)} className="w-full bg-[#090b0f] border border-gray-900 rounded-xl p-3 text-xs text-white focus:outline-none">
+                <select value={stock} onChange={(e) => setStock(e.target.value)} className="w-full bg-[#090b0f] border border-gray-900 rounded-xl p-3 text-xs text-white focus:outline-none font-mono">
                   <option value="SBIN.NS">SBIN.NS</option>
                   <option value="RELIANCE.NS">RELIANCE.NS</option>
                   <option value="TCS.NS">TCS.NS</option>
@@ -180,12 +215,33 @@ export default function TradeJournal({ token }: TradeJournalProps) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Action Mode</label>
-              <select value={action} onChange={(e) => setAction(e.target.value)} className="w-full bg-[#090b0f] border border-gray-900 rounded-xl p-3 text-xs text-white focus:outline-none">
-                <option value="BUY">BUY / LONG</option>
-                <option value="SELL">SELL / SHORT</option>
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Action Mode</label>
+                <select value={action} onChange={(e) => setAction(e.target.value)} className="w-full bg-[#090b0f] border border-gray-900 rounded-xl p-3 text-xs text-white focus:outline-none font-medium">
+                  <option value="BUY">BUY / LONG</option>
+                  <option value="SELL">SELL / SHORT</option>
+                </select>
+              </div>
+
+              {/* 🎯 v1.5 JOURNAL MANUAL ATTRIBUTION DROPDOWN SELECTOR */}
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 mb-1 flex items-center gap-1 uppercase">
+                  <Cpu className="w-3 h-3 text-purple-400" /> Attribution Strategy
+                </label>
+                <select
+                  value={manualStrategyId}
+                  onChange={(e) => setManualStrategyId(e.target.value)}
+                  className="w-full bg-[#090b0f] border border-gray-900 rounded-xl p-3 text-xs text-purple-300 font-bold focus:outline-none font-mono cursor-pointer"
+                >
+                  <option value="" className="text-gray-500 font-normal">-- UNTAGGED SYSTEM --</option>
+                  {availableStrategies.map((strat) => (
+                    <option key={strat.id} value={strat.id} className="text-white bg-[#0f121a]">
+                      {strat.name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div>
@@ -210,11 +266,35 @@ export default function TradeJournal({ token }: TradeJournalProps) {
             )}
           </div>
 
-          {/* DYNAMIC AUDIT BANNER CONTAINER CARD */}
-          {auditResult && (
-            <div className="bg-[#10141f] border border-[#a855f7]/30 p-4 rounded-xl text-xs space-y-2 animate-fadeIn relative">
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 font-black px-2 py-0.5 rounded font-mono uppercase">AI Psychological Audit Correction Card</span>
-              <p className="text-gray-300 font-sans leading-relaxed mt-1">{auditResult}</p>
+          {/* 🧠 DYNAMIC STRUCTURED AI BEHAVIORAL DIAGNOSTIC OVERHAUL MATRIX PANEL */}
+          {auditResult && auditResult.status === 'SUCCESS' && (
+            <div className="bg-[#121622] border border-purple-500/20 p-5 rounded-2xl space-y-4 animate-fadeIn shadow-2xl">
+              <div className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5 border-b border-gray-900 pb-3">
+                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                🧠 AI Psychological Diagnostic Matrix
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 font-mono text-xs">
+                <div className="bg-[#090b0f] p-4 rounded-xl border border-gray-900 text-center">
+                  <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Discipline Rating</span>
+                  <span className={`text-2xl font-black ${auditResult.discipline_score >= 70 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {auditResult.discipline_score}/100
+                  </span>
+                </div>
+                <div className="bg-[#090b0f] p-4 rounded-xl border border-gray-900 text-center flex flex-col justify-center">
+                  <span className="block text-[9px] text-gray-500 font-bold uppercase mb-1">Behavioral Core Flag</span>
+                  <span className="text-amber-400 font-black text-[10px] tracking-wide uppercase line-clamp-1">
+                    ⚠️ {auditResult.primary_emotional_trap}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-[#090b0f] p-4 rounded-xl border border-gray-900 space-y-1">
+                <span className="block text-[9px] font-bold text-purple-400 uppercase tracking-widest">Tactical Re-Conditioning Advice</span>
+                <p className="text-gray-300 text-xs font-sans leading-relaxed font-medium">
+                  {auditResult.cognitive_behavioral_advice}
+                </p>
+              </div>
             </div>
           )}
 
@@ -225,14 +305,26 @@ export default function TradeJournal({ token }: TradeJournalProps) {
                 <div key={node.id} className="bg-[#10141f] border border-gray-900 rounded-xl p-4 text-xs font-mono flex flex-col gap-1 relative overflow-hidden shadow-lg group">
                   <div className="absolute right-0 top-0 w-24 h-24 bg-[#00ffcc]/5 rounded-full blur-xl pointer-events-none"></div>
                   
-                  <div className="flex justify-between text-[9px] text-gray-500 font-bold uppercase tracking-wider">
+                  <div className="flex justify-between text-[9px] text-gray-500 font-bold uppercase tracking-wider items-center">
                     <span>{node.created_at ? new Date(node.created_at).toLocaleTimeString() : 'LIVE'}</span>
-                    <span className={node.type === 'BUY' ? 'text-emerald-400' : 'text-rose-400'}>{node.type === 'BUY' ? 'BUY / LONG' : 'SELL / SHORT'}</span>
+                    
+                    {/* 🎯 v1.5 STRATEGY ATTRIBUTION VISUAL CARD CELL BADGE */}
+                    <div className="flex items-center gap-2">
+                      {node.strategy?.name && (
+                        <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wide">
+                          🎯 {node.strategy.name}
+                        </span>
+                      )}
+                      <span className={node.type === 'BUY' ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                        {node.type === 'BUY' ? 'BUY / LONG' : 'SELL / SHORT'}
+                      </span>
+                    </div>
                   </div>
+                  
                   <div className="flex justify-between text-white font-black text-base tracking-tight mt-0.5">
                     <span>{node.symbol}</span>
                     <div className="space-x-4">
-                      <span className="text-gray-400 text-xs">Qty: {node.quantity}</span>
+                      <span className="text-gray-400 text-xs font-normal">Qty: {node.quantity}</span>
                       <span>₹{node.entry_price}</span>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 // frontend/src/components/RiskEngine.tsx
 import React, { useState, useMemo, useEffect } from 'react';
-import { ShieldCheck, Target, AlertTriangle, Calculator, PieChart as PieChartIcon, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, Target, AlertTriangle, Calculator, PieChart as PieChartIcon, ShieldAlert, Cpu } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface RiskEngineProps {
@@ -19,28 +19,25 @@ export default function RiskEngine({ token }: RiskEngineProps) {
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<{success: boolean; message: string} | null>(null);
 
-  // 📡 Query live account parameter thresholds from PostgreSQL on mount
+  // v1.5 Strategy Attribution Matrix Local States
+  const [userStrategies, setUserStrategies] = useState<any[]>([]);
+  const [selectedStrategyId, setSelectedStrategyId] = useState<string>("");
+
+  const IS_PROD = import.meta.env.PROD;
+  const API_BASE_URL = IS_PROD 
+    ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
+    : 'http://localhost:8000';
+
+  // 📡 Query live account parameters and strategy lists from PostgreSQL on mount
   useEffect(() => {
     if (!token) return;
     
-    const IS_PROD = import.meta.env.PROD;
-    const API_BASE_URL = IS_PROD 
-      ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') 
-      : 'http://localhost:8000';
-    
+    // 1. Fetch risk metrics
     fetch(`${API_BASE_URL}/api/analytics/risk-profile`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     })
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`Server returned status code: ${res.status}`);
-      }
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-      // ✅ Guard clause: Safely ensure data is populated before reading structural keys
       if (data && data.status === 'SUCCESS') {
         setDbRiskProfile(data);
         setCapital(data.available_capital);
@@ -48,7 +45,19 @@ export default function RiskEngine({ token }: RiskEngineProps) {
       }
     })
     .catch(err => console.error("Risk profile ledger sync error:", err));
-  }, [token]);
+
+    // 2. Fetch custom strategy tracking IDs for dropdown injection
+    fetch(`${API_BASE_URL}/api/strategies`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.status === 'SUCCESS') {
+        setUserStrategies(data.strategies || []);
+      }
+    })
+    .catch(err => console.error("Strategies attribution ledger sync error:", err));
+  }, [token, API_BASE_URL]);
 
   const riskData = useMemo(() => {
     const riskAmount = capital * (riskPct / 100);
@@ -83,7 +92,8 @@ export default function RiskEngine({ token }: RiskEngineProps) {
       calculatedShares: riskData.maxShares,
       tickerSymbol,
       entryPrice,
-      stopLoss
+      stopLoss,
+      attributedStrategyId: selectedStrategyId || "NONE"
     });
 
     if (!token) {
@@ -91,17 +101,12 @@ export default function RiskEngine({ token }: RiskEngineProps) {
       return;
     }
 
-    // Fallback: If calculation fails or equals 0, use 250 shares so you can still test your backend route!
     const finalQuantity = riskData.maxShares > 0 ? riskData.maxShares : 250;
     
     setIsExecuting(true);
     setExecutionStatus(null);
 
-    const IS_PROD = import.meta.env.PROD;
-    const API_BASE_URL = IS_PROD ? (import.meta.env.VITE_API_BASE_URL || 'https://tradepulse-backend-2533.onrender.com') : 'http://localhost:8000';
-
     try {
-      // ✅ Completely safe production connection endpoint
       const response = await fetch(`${API_BASE_URL}/api/orders/execute`, {
         method: 'POST',
         headers: {
@@ -115,7 +120,8 @@ export default function RiskEngine({ token }: RiskEngineProps) {
           entry_price: entryPrice || 150.00,
           stop_loss: stopLoss || 140.00,
           take_profit: (entryPrice || 150.00) + (Math.abs((entryPrice || 150.00) - (stopLoss || 140.00)) * 2),
-          is_paper_trade: true
+          is_paper_trade: true,
+          strategy_id: selectedStrategyId || null // 🎯 Attributes order to rule layer
         })
       });
 
@@ -129,6 +135,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
         setEntryPrice(150.00);      
         setStopLoss(140.00);       
         setTickerSymbol("SBIN.NS"); 
+        setSelectedStrategyId(""); // Reset selector dropdown
         
       } else {
         setExecutionStatus({ success: false, message: data.detail || "Execution clearing fault." });
@@ -190,16 +197,37 @@ export default function RiskEngine({ token }: RiskEngineProps) {
               </div>
             </div>
 
-            {/* Target Asset Ticker Node */}
-            <div className="pt-2">
-              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Target Asset Ticker</label>
-              <input 
-                type="text" 
-                value={tickerSymbol} 
-                onChange={(e) => setTickerSymbol(e.target.value.toUpperCase())} 
-                className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-[#00ffcc] focus:outline-none font-mono uppercase font-black tracking-wider" 
-                placeholder="e.g. SBIN.NS"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              {/* Target Asset Ticker Node */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Target Asset Ticker</label>
+                <input 
+                  type="text" 
+                  value={tickerSymbol} 
+                  onChange={(e) => setTickerSymbol(e.target.value.toUpperCase())} 
+                  className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-[#00ffcc] focus:outline-none font-mono uppercase font-black tracking-wider" 
+                  placeholder="e.g. SBIN.NS"
+                />
+              </div>
+
+              {/* 🎯 v1.5 STRATEGY ATTRIBUTION MATRIX DROPDOWN SELECTION COMPONENT */}
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 mb-1 flex items-center gap-1 uppercase">
+                  <Cpu className="w-3 h-3 text-purple-400" /> Linked Strategy
+                </label>
+                <select
+                  value={selectedStrategyId}
+                  onChange={(e) => setSelectedStrategyId(e.target.value)}
+                  className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-purple-300 font-bold focus:outline-none font-mono cursor-pointer"
+                >
+                  <option value="" className="text-gray-500 font-normal">-- UNTAGGED --</option>
+                  {userStrategies.map((strat) => (
+                    <option key={strat.id} value={strat.id} className="text-white bg-[#0f121a]">
+                      {strat.name.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* 💥 DEPLOY TRANSACT BUTTON BLOCK */}

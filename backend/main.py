@@ -77,6 +77,11 @@ class StrategyCreatePayload(BaseModel):
         description: Optional[str] = None
         rules_configuration: Optional[dict] = None  # Flexible JSON/Dict mapping to JSONB
 
+class AuditResponsePayload(BaseModel):
+    status: str
+    discipline_score: int             # 0 to 100 rating
+    primary_emotional_trap: str       # e.g., "FOMO", "Revenge Trading", "Overleveraging"
+    cognitive_behavioral_advice: str  # Direct tactical feedback text
 class Config:
     from_attributes = True
         
@@ -203,11 +208,13 @@ def read_current_user_profile(current_user: User = Depends(get_current_user)):
 class OrderExecutionRequest(BaseModel):
     symbol: str
     type: str
-    quantity: float            # ⚡ Handled flexibly from frontend
+    quantity: float            
     entry_price: float
     stop_loss: Optional[float] = None     
     take_profit: Optional[float] = None
     is_paper_trade: Optional[bool] = True
+    strategy_id: Optional[str] = None    # 🎯 Added for v1.5 strategy attribution matrix
+
 
 @app.post("/api/orders/execute")
 def execute_order(
@@ -468,12 +475,76 @@ async def update_session_drawdown_metrics(payload: dict = Body(...)):
         return {"status": "LOCKED", "message": "🚨 DRAWDOWN BOUNDARY CRUSHED. LOCKOUT ACTIVE."}
     return {"status": "OPERATIONAL", "current_drawdown": simulated_pnl}
 
-@app.post("/api/journal/audit")
-async def run_psychology_audit_stream(payload: dict = Body(...)):
-    history_array = payload.get("history", [])
-    if not history_array:
-        return {"audit": "Log entries to initialize automated behavior analysis."}
-    return {"audit": generate_behavioral_audit(history_array)}
+@app.post("/api/journal/audit", response_model=AuditResponsePayload)
+def analyze_journal_psychology(
+    payload: dict, 
+    db: Session = Depends(get_db),
+    authorization: str = Header(None)
+):
+    """
+    Analyzes historical trade logs and mindset metadata patterns.
+    Bypasses dependency injection errors and manually processes security strings.
+    """
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise credentials_exception
+        
+    token = authorization.split(" ")[1]
+    
+    try:
+        decoded_payload = jose_jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = decoded_payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except Exception:
+        raise credentials_exception
+        
+    current_user = db.query(User).filter(User.email == email).first()
+    if current_user is None:
+        raise credentials_exception
+
+    trade_history = payload.get("history", [])
+    if not trade_history:
+        return {
+            "status": "NO_DATA",
+            "discipline_score": 100,
+            "primary_emotional_trap": "NONE",
+            "cognitive_behavioral_advice": "No transaction log footprints found to compile an audit profile."
+        }
+
+    # Gather textual mindset entries to check for psychological warning signs
+    # ✅ FIX: The 'or ""' safety fallback ensures NoneType fields translate to safe blank strings cleanly
+    all_notes = " ".join([(t.get("notes") or "").lower() for t in trade_history])
+    
+    # Simple high-performance keyword scanning baseline rule map
+    score = 85
+    trap = "DISCIPLINED EXECUTION"
+    advice = "Your trade journal logs show structural adherence to baseline system risk parameters. Maintain position consistency."
+
+    if "fomo" in all_notes or "missed" in all_notes or "chased" in all_notes:
+        score -= 25
+        trap = "FOMO (FEAR OF MISSING OUT)"
+        advice = "You are entering positions late due to chase mechanics after an asset has extended out of premium zones. Place strict limit orders and freeze the terminal if execution levels slip past your Entry Price threshold."
+    elif "revenge" in all_notes or "frustrated" in all_notes or "recover" in all_notes or "loss" in all_notes:
+        score -= 35
+        trap = "REVENGE TRADING MOMENTUM"
+        advice = "Emotional acceleration detected following adverse stop-loss executions. You are trying to force capital extraction from the market to build back drawdowns. Step away for a minimum of 2 hours when a safety boundary is triggered."
+    elif "aggressive" in all_notes or "gambled" in all_notes or "huge" in all_notes:
+        score -= 20
+        trap = "HYPER-AGGRESSIVE SIZING"
+        advice = "Position sizing parameters show structural variance from fixed percentage risk allocations. Force execution allocations strictly through your Quantitative Risk Engine sidebar node."
+
+    return {
+        "status": "SUCCESS",
+        "discipline_score": max(score, 10),
+        "primary_emotional_trap": trap,
+        "cognitive_behavioral_advice": advice
+    }
 
 @app.post("/api/stocks/analyze")
 async def process_custom_stock_search(payload: dict = Body(...)):
