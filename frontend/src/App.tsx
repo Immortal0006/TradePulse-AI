@@ -113,18 +113,18 @@ export default function App() {
   // --- HARD RISK OVER-RIDE INTERACTION CANVAS ---
   if (isSystemLocked) {
     return (
-      <div className="min-h-screen bg-[#090b0f] text-white flex flex-col items-center justify-center p-6">
-        <div className="bg-[#131722] border-t-4 border-rose-500 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
-          <ShieldAlert className="w-16 h-16 text-rose-500 mx-auto mb-4 animate-bounce" />
-          <h2 className="text-2xl font-bold tracking-tight mb-2 text-white">SAFETY LOCKOUT ENGAGED</h2>
-          <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+      <div className="min-h-screen bg-[#f4f6f3] text-slate-900 flex flex-col items-center justify-center p-6">
+        <div className="bg-white border border-slate-200 border-t-4 border-t-rose-600 p-8 rounded-xl max-w-md w-full text-center shadow-sm">
+          <ShieldAlert className="w-12 h-12 text-rose-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold tracking-tight mb-2 text-slate-900">SAFETY LOCKOUT ENGAGED</h2>
+          <p className="text-slate-600 text-sm mb-6 leading-relaxed">
             Your terminal execution interface has been completely isolated. Maximum daily drawdown limit parameters exceeded (-₹10,000 threshold breached).
           </p>
           <textarea 
-            className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-rose-500/50 mb-4 h-24"
+            className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 mb-4 h-24"
             placeholder="Type your cognitive behavioral log statement down here before cooling-off timer expiration..."
           />
-          <button className="w-full bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold py-3 px-4 rounded-xl transition-all shadow-lg shadow-rose-600/20">
+          <button className="w-full bg-rose-700 hover:bg-rose-800 text-white text-sm font-semibold py-3 px-4 rounded-lg transition-colors">
             Log Discipline Justification
           </button>
         </div>
@@ -133,31 +133,31 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090b0f] text-gray-100 flex font-sans">
+    <div className="min-h-screen bg-[#f4f6f3] text-slate-900 flex font-sans">
       
       {/* SIDEBAR NAVIGATION GRID DRAWER */}
-      <aside className="w-64 bg-[#0f121a] border-r border-gray-900 flex flex-col p-4 justify-between shrink-0">
+      <aside className="w-64 bg-[#17211f] text-slate-100 border-r border-[#26332f] flex flex-col p-4 justify-between shrink-0">
         <div className="space-y-6">
-          <div className="flex items-center gap-2.5 px-3 py-4 border-b border-gray-900">
-            <Layers className="w-6 h-6 text-[#00ffcc]" />
-            <span className="font-extrabold text-base tracking-wider text-white">TRADEPULSE AI</span>
-            <span className="text-[9px] bg-[#00ffcc]/10 text-[#00ffcc] font-mono px-1.5 py-0.5 rounded">SaaS</span>
+          <div className="flex items-center gap-2.5 px-3 py-4 border-b border-[#30403a]">
+            <Layers className="w-6 h-6 text-emerald-400" />
+            <span className="font-bold text-base tracking-wide text-white">TradePulse</span>
+            <span className="text-[9px] bg-emerald-400/10 text-emerald-300 font-medium px-1.5 py-0.5 rounded">AI</span>
           </div>
 
           <nav className="space-y-1">
-            <button onClick={() => setActiveTab('watchlist')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'watchlist' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
+            <button onClick={() => setActiveTab('watchlist')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'watchlist' ? 'bg-[#293b34] text-emerald-300' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               <Activity className="w-4 h-4" /> Watchlist
             </button>
-            <button onClick={() => setActiveTab('cost')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'cost' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
+            <button onClick={() => setActiveTab('cost')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'cost' ? 'bg-[#293b34] text-emerald-300' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               <SlidersHorizontal className="w-4 h-4" /> Cost Guard
             </button>
-            <button onClick={() => setActiveTab('option')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'option' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
+            <button onClick={() => setActiveTab('option')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'option' ? 'bg-[#293b34] text-emerald-300' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               <BadgeInfo className="w-4 h-4" /> Option Safe
             </button>
-            <button onClick={() => setActiveTab('risk')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'risk' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
+            <button onClick={() => setActiveTab('risk')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'risk' ? 'bg-[#293b34] text-emerald-300' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               <Calculator className="w-4 h-4" /> Risk Engine
             </button>
-            <button onClick={() => setActiveTab('journal')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'journal' ? 'bg-[#171c28] text-[#00ffcc] shadow-md' : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'}`}>
+            <button onClick={() => setActiveTab('journal')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${activeTab === 'journal' ? 'bg-[#293b34] text-emerald-300' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
               <NotebookTabs className="w-4 h-4" /> Trade Journal
             </button>
             
@@ -166,28 +166,28 @@ export default function App() {
               onClick={() => setActiveTab('strategy')} 
               className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
                 activeTab === 'strategy' 
-                  ? 'bg-purple-950/40 text-purple-400 border border-purple-500/20 shadow-md' 
-                  : 'text-gray-400 hover:bg-gray-800/20 hover:text-white'
+                  ? 'bg-[#293b34] text-emerald-300' 
+                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`}
             >
-              <Cpu className="w-4 h-4 text-purple-400" /> Strategy Hub
+              <Cpu className="w-4 h-4 text-emerald-300" /> Strategy Hub
             </button>
           </nav>
         </div>
  
         <div className="space-y-3">
           {/* ACCOUNT DRAWDOWN SAFETY TESTING MODULE PANEL */}
-          <div className="bg-[#131722] border border-gray-900 rounded-xl p-4 space-y-3">
-            <div className="flex justify-between text-[11px] font-bold tracking-wider text-gray-400 uppercase">
+          <div className="bg-[#202d28] border border-[#30403a] rounded-lg p-4 space-y-3">
+            <div className="flex justify-between text-[11px] font-semibold tracking-wider text-slate-300 uppercase">
               <span>Risk Control Room</span>
             </div>
             <input 
               type="range" min="-12000" max="0" step="500" value={simulatedLoss} onChange={(e) => setSimulatedLoss(Number(e.target.value))}
-              className="w-full accent-[#00ffcc] bg-gray-900 h-1.5 rounded-lg cursor-pointer"
+              className="w-full accent-emerald-400 bg-[#30403a] h-1.5 rounded-lg cursor-pointer"
             />
             <div className="flex justify-between items-center font-mono text-xs">
-              <span className="text-gray-500 text-[10px]">Today's PnL:</span>
-              <span className={`font-bold ${simulatedLoss <= -10000 ? 'text-rose-500 animate-pulse' : 'text-amber-400'}`}>
+              <span className="text-slate-400 text-[10px]">Today’s P&L:</span>
+              <span className={`font-bold ${simulatedLoss <= -10000 ? 'text-rose-400' : 'text-amber-300'}`}>
                 ₹{simulatedLoss}
               </span>
             </div>
@@ -196,7 +196,7 @@ export default function App() {
           {/* SESSION TERMINATION BUTTON */}
           <button 
             onClick={handleLogout}
-            className="w-full bg-[#131722] border border-gray-900 text-gray-400 hover:text-rose-400 hover:border-rose-950 p-2.5 text-[10px] uppercase font-bold tracking-wider rounded-xl transition-all flex items-center justify-center gap-2"
+            className="w-full bg-[#202d28] border border-[#30403a] text-slate-300 hover:text-rose-300 hover:border-rose-900 p-2.5 text-[10px] uppercase font-semibold tracking-wider rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <LogOut className="w-3 h-3" /> Terminate Session
           </button>
@@ -204,7 +204,7 @@ export default function App() {
       </aside>
 
       {/* DYNAMIC COMPONENT PANEL CANVAS ACTION CONTENT SPACE */}
-      <main className="flex-1 p-8 overflow-y-auto bg-[#090b0f]">
+      <main className="min-w-0 flex-1 p-6 md:p-8 overflow-y-auto bg-[#f4f6f3]">
         {activeTab === 'watchlist' && <Watchlist marketTicks={marketTicks} />}
         {activeTab === 'cost' && <CostGuard token={token} />}     
         {activeTab === 'option' && <OptionSafe token={token} />}   
