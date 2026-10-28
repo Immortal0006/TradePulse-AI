@@ -76,26 +76,26 @@ export default function CostGuard({ token }: CostGuardProps) {
   return (
     <div className="space-y-6 max-w-6xl animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-black text-white tracking-tight">Institutional Liquidity Simulator</h1>
-        <p className="text-gray-400 text-xs mt-1">Visualize how large order block sizes consume order book depth, causing physical price slippage and VWAP divergence.</p>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Institutional Liquidity Simulator</h1>
+        <p className="text-slate-600 text-xs mt-1">Visualize how large order block sizes consume order book depth, causing physical price slippage and VWAP divergence.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT PANEL: INTERACTIVE CONTROLS */}
-        <div className="bg-[#10141f] border border-gray-900 p-5 rounded-2xl space-y-6 shadow-xl h-fit">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white border-b border-gray-900 pb-2 flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-[#00ffcc]" /> Block Execution Setup
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-6 shadow-xl h-fit">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-2 flex items-center gap-2">
+            <SlidersHorizontal className="w-4 h-4 text-emerald-700" /> Block Execution Setup
           </h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Target Asset Base Price (₹)</label>
-              <input type="number" value={askPrice} onChange={(e) => setAskPrice(Number(e.target.value))} className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none font-mono" />
+              <label className="block text-[10px] font-bold text-slate-600 mb-1 uppercase">Target Asset Base Price (₹)</label>
+              <input type="number" value={askPrice} onChange={(e) => setAskPrice(Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none font-mono" />
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Market Depth (Liquidity)</label>
-              <select value={liquidityProfile} onChange={(e) => setLiquidityProfile(e.target.value as any)} className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none font-mono">
+              <label className="block text-[10px] font-bold text-slate-600 mb-1 uppercase">Market Depth (Liquidity)</label>
+              <select value={liquidityProfile} onChange={(e) => setLiquidityProfile(e.target.value as any)} className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none font-mono">
                 <option value="Deep">Deep (Blue Chip / High Volume)</option>
                 <option value="Average">Average (Mid-Cap)</option>
                 <option value="Thin">Thin (Small-Cap / Penny)</option>
@@ -103,18 +103,18 @@ export default function CostGuard({ token }: CostGuardProps) {
             </div>
 
             <div className="pt-2">
-              <div className="flex justify-between text-[10px] font-mono mb-2 text-gray-400 uppercase font-bold">
+              <div className="flex justify-between text-[10px] font-mono mb-2 text-slate-600 uppercase font-bold">
                 <span>Order Block Size</span>
-                <span className="text-[#00ffcc] font-black">{qty.toLocaleString()} Shares</span>
+                <span className="text-emerald-700 font-black">{qty.toLocaleString()} Shares</span>
               </div>
-              <input type="range" min="100" max="25000" step="100" value={qty} onChange={(e) => setQty(Number(e.target.value))} className="w-full accent-[#00ffcc] bg-gray-800 h-1.5 rounded-lg cursor-pointer" />
+              <input type="range" min="100" max="25000" step="100" value={qty} onChange={(e) => setQty(Number(e.target.value))} className="w-full accent-emerald-700 bg-gray-800 h-1.5 rounded-lg cursor-pointer" />
             </div>
           </div>
 
-          <div className={`p-4 rounded-xl flex gap-3 text-xs leading-relaxed border ${displayDivergence > 0.35 ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'}`}>
+          <div className={`p-4 rounded-xl flex gap-3 text-xs leading-relaxed border ${displayDivergence > 0.35 ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
             <Scale className="w-5 h-5 shrink-0 mt-0.5" />
             <div>
-              <strong className="block text-white mb-0.5 uppercase tracking-wider text-[10px]">Execution Verdict:</strong>
+              <strong className="block text-slate-900 mb-0.5 uppercase tracking-wider text-[10px]">Execution Verdict:</strong>
               {displayDivergence > 0.35 
                 ? "WARNING: Severe Slippage Leakage detected by Core Engine. Slice order parameters using institutional block routing frameworks."
                 : "OPTIMAL: Market depth is sufficient to absorb this block size with minimal execution penalty."}
@@ -125,27 +125,27 @@ export default function CostGuard({ token }: CostGuardProps) {
         {/* RIGHT PANEL: VISUALIZER AND TELEMETRY */}
         <div className="lg:col-span-2 space-y-4">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">Simulated Fill Price</span>
-              <span className="text-lg font-black text-white mt-1 block">₹{displayFill}</span>
+            <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+              <span className="block text-[9px] text-slate-500 font-bold uppercase">Simulated Fill Price</span>
+              <span className="text-lg font-black text-slate-900 mt-1 block">₹{displayFill}</span>
             </div>
-            <div className="bg-[#10141f] border border-rose-500/20 p-4 rounded-xl font-mono text-center shadow-lg relative">
-              <span className="block text-[9px] text-gray-400 font-bold uppercase">Slippage Leakage</span>
-              <span className="text-lg font-black text-rose-400 mt-1 block">₹{displaySlippage.toLocaleString()}</span>
+            <div className="bg-white border border-rose-200 p-4 rounded-xl font-mono text-center shadow-lg relative">
+              <span className="block text-[9px] text-slate-600 font-bold uppercase">Slippage Leakage</span>
+              <span className="text-lg font-black text-rose-700 mt-1 block">₹{displaySlippage.toLocaleString()}</span>
             </div>
-            <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">Degradation/Unit</span>
-              <span className="text-lg font-black text-amber-400 mt-1 block">₹{displayDegradationPerUnit}</span>
+            <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+              <span className="block text-[9px] text-slate-500 font-bold uppercase">Degradation/Unit</span>
+              <span className="text-lg font-black text-amber-700 mt-1 block">₹{displayDegradationPerUnit}</span>
             </div>
-            <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-              <span className="block text-[9px] text-gray-500 font-bold uppercase">Slippage Deviation</span>
-              <span className="text-lg font-black text-purple-400 mt-1 block">+{displayDivergence}%</span>
+            <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+              <span className="block text-[9px] text-slate-500 font-bold uppercase">Slippage Deviation</span>
+              <span className="text-lg font-black text-emerald-700 mt-1 block">+{displayDivergence}%</span>
             </div>
           </div>
 
-          <div className="bg-[#10141f] border border-gray-900 p-5 rounded-2xl shadow-xl space-y-4 h-[420px] flex flex-col">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
-              <BarChart2 className="w-4 h-4 text-[#00ffcc]" /> Order Book Depth & Consumption Profile
+          <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-4 h-[420px] flex flex-col">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-600 flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-emerald-700" /> Order Book Depth & Consumption Profile
             </h3>
             
             <div className="flex-1 w-full min-h-0">
@@ -172,8 +172,8 @@ export default function CostGuard({ token }: CostGuardProps) {
               </ResponsiveContainer>
             </div>
 
-            <div className="flex items-start gap-2 text-gray-400 text-[10px] leading-relaxed font-mono bg-[#090b0f] p-3 rounded-xl border border-gray-900">
-              <Activity className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 text-slate-600 text-[10px] leading-relaxed font-mono bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <Activity className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" />
               <div>
                 <strong>Visualizing Market Impact:</strong> The red spiked area represents the liquidity levels your order physically consumed. As you increase the block size, you are forced to buy shares at higher and higher prices, draining capital through hidden slippage.
               </div>

@@ -57,33 +57,33 @@ export default function OptionSafe({ token }: OptionSafeProps) {
   return (
     <div className="space-y-6 max-w-5xl animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-black text-white tracking-tight">Real-Time Derivatives Option Matrix</h1>
-        <p className="text-gray-400 text-xs mt-1">Extracts active live market option chains and maps structural Black-Scholes sensitivity layers on-demand.</p>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Real-Time Derivatives Option Matrix</h1>
+        <p className="text-slate-600 text-xs mt-1">Extracts active live market option chains and maps structural Black-Scholes sensitivity layers on-demand.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* INPUT FORM SIDEBAR */}
-        <div className="bg-[#10141f] border border-gray-900 p-5 rounded-2xl space-y-4 shadow-xl h-fit">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-white border-b border-gray-900 pb-2">Chain Targets</h3>
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl space-y-4 shadow-xl h-fit">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-2">Chain Targets</h3>
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Underlying Ticker</label>
+            <label className="block text-[10px] font-bold text-slate-600 mb-1 uppercase">Underlying Ticker</label>
             <input 
               type="text" 
               value={symbol} 
               onChange={(e) => setSymbol(e.target.value)} 
               placeholder="e.g. RELIANCE.NS, AAPL"
-              className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none font-mono uppercase"
+              className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none font-mono uppercase"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Target Strike Price</label>
-            <input type="number" value={strike} onChange={(e) => setStrike(Number(e.target.value))} className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none font-mono" />
+            <label className="block text-[10px] font-bold text-slate-600 mb-1 uppercase">Target Strike Price</label>
+            <input type="number" value={strike} onChange={(e) => setStrike(Number(e.target.value))} className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none font-mono" />
           </div>
 
           {isDataLoaded && matrix.all_expiries && (
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 mb-1 uppercase">Active Expirations</label>
-              <select value={chosenExpiry} onChange={(e) => setChosenExpiry(e.target.value)} className="w-full bg-[#090b0f] border border-gray-800 rounded-xl p-3 text-xs text-white focus:outline-none font-mono">
+              <label className="block text-[10px] font-bold text-slate-600 mb-1 uppercase">Active Expirations</label>
+              <select value={chosenExpiry} onChange={(e) => setChosenExpiry(e.target.value)} className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none font-mono">
                 {matrix.all_expiries.map((exp: string) => (
                   <option key={exp} value={exp}>{exp}</option>
                 ))}
@@ -91,7 +91,7 @@ export default function OptionSafe({ token }: OptionSafeProps) {
             </div>
           )}
 
-          <button onClick={triggerGreeksAnalysis} className="w-full bg-[#00ffcc] text-gray-900 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-[#00e6b8] transition-all">
+          <button onClick={triggerGreeksAnalysis} className="w-full bg-emerald-800 text-gray-900 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-[#00e6b8] transition-all">
             {loading ? "Extracting Chain..." : "Scan Options Matrix"}
           </button>
         </div>
@@ -103,10 +103,10 @@ export default function OptionSafe({ token }: OptionSafeProps) {
               
               {/* 🚨 PREMIUM RISK HIGHLIGHT DECAY FLAG */}
               {riskClassification !== 'SAFE' && (
-                <div className={`p-4 rounded-xl flex gap-3 text-xs font-mono items-center animate-pulse border ${
+                <div className={`p-4 rounded-xl flex gap-3 text-xs font-mono items-center  border ${
                   riskClassification === 'CRITICAL_DECAY' 
-                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' 
-                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                    ? 'bg-rose-50 border-rose-200 text-rose-700' 
+                    : 'bg-amber-50 border-amber-200 text-amber-700'
                 }`}>
                   <ShieldAlert className="w-5 h-5 shrink-0" />
                   <div>
@@ -116,69 +116,69 @@ export default function OptionSafe({ token }: OptionSafeProps) {
               )}
 
               {/* PRIMARY CONTRACT TELEMETRY DISPLAY */}
-              <div className="bg-[#141a29] border border-gray-800 p-5 rounded-2xl grid grid-cols-2 gap-4 text-xs font-mono relative">
-                <span className={`absolute top-3 right-3 text-[8px] font-black px-2 py-0.5 rounded ${matrix.data_mode === 'LIVE_EXCHANGE_DATA' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'}`}>
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl grid grid-cols-2 gap-4 text-xs font-mono relative">
+                <span className={`absolute top-3 right-3 text-[8px] font-black px-2 py-0.5 rounded ${matrix.data_mode === 'LIVE_EXCHANGE_DATA' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-violet-50 text-emerald-700 border border-violet-200'}`}>
                   📡 {matrix.data_mode === 'LIVE_EXCHANGE_DATA' ? 'LIVE FEED' : 'QUANT SIMULATION ENGINE'}
                 </span>
 
-                <div><span className="text-gray-500 block text-[9px] font-black uppercase">Live Spot Price</span><span className="text-white font-black text-base">{currencySymbol}{matrix.spot_price || matrix.underlying_price || 820}</span></div>
-                <div><span className="text-gray-500 block text-[9px] font-black uppercase">Matched Strike Node</span><span className="text-[#00ffcc] font-black text-base">{currencySymbol}{matrix.strike_matched || strike}</span></div>
-                <div className="border-t border-gray-800/60 pt-2"><span className="text-gray-500 block text-[9px] font-black uppercase">Chain Expiration</span><span className="text-purple-400 font-bold">{matrix.expiry_used || 'Dynamic'}</span></div>
-                <div className="border-t border-gray-800/60 pt-2"><span className="text-gray-500 block text-[9px] font-black uppercase">Implied Volatility</span><span className="text-amber-400 font-bold">{matrix.implied_volatility || 22}%</span></div>
+                <div><span className="text-slate-500 block text-[9px] font-black uppercase">Live Spot Price</span><span className="text-slate-900 font-black text-base">{currencySymbol}{matrix.spot_price || matrix.underlying_price || 820}</span></div>
+                <div><span className="text-slate-500 block text-[9px] font-black uppercase">Matched Strike Node</span><span className="text-emerald-700 font-black text-base">{currencySymbol}{matrix.strike_matched || strike}</span></div>
+                <div className="border-t border-slate-200/60 pt-2"><span className="text-slate-500 block text-[9px] font-black uppercase">Chain Expiration</span><span className="text-emerald-700 font-bold">{matrix.expiry_used || 'Dynamic'}</span></div>
+                <div className="border-t border-slate-200/60 pt-2"><span className="text-slate-500 block text-[9px] font-black uppercase">Implied Volatility</span><span className="text-amber-700 font-bold">{matrix.implied_volatility || 22}%</span></div>
               </div>
 
               {/* GREEKS QUAD BLOCK */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-                  <span className="block text-[9px] text-gray-500 font-bold uppercase">Delta (Δ)</span>
-                  <span className="text-xl font-extrabold text-[#00ffcc] mt-1 block">{matrix.greeks?.delta ?? 0.5}</span>
+                <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase">Delta (Δ)</span>
+                  <span className="text-xl font-extrabold text-emerald-700 mt-1 block">{matrix.greeks?.delta ?? 0.5}</span>
                 </div>
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-                  <span className="block text-[9px] text-gray-500 font-bold uppercase">Gamma (γ)</span>
-                  <span className="text-xl font-extrabold text-indigo-400 mt-1 block">{matrix.greeks?.gamma ?? 0.002}</span>
+                <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase">Gamma (γ)</span>
+                  <span className="text-xl font-extrabold text-indigo-700 mt-1 block">{matrix.greeks?.gamma ?? 0.002}</span>
                 </div>
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-                  <span className="block text-[9px] text-gray-500 font-bold uppercase">Theta (θ)</span>
-                  <span className="text-xl font-extrabold text-rose-400 mt-1 block">-{Math.abs(calculatedTheta).toFixed(2)}</span>
+                <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase">Theta (θ)</span>
+                  <span className="text-xl font-extrabold text-rose-700 mt-1 block">-{Math.abs(calculatedTheta).toFixed(2)}</span>
                 </div>
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl font-mono text-center shadow-lg">
-                  <span className="block text-[9px] text-gray-500 font-bold uppercase">Vega (v)</span>
-                  <span className="text-xl font-extrabold text-purple-400 mt-1 block">{matrix.greeks?.vega ?? 0.15}</span>
+                <div className="bg-white border border-slate-200 p-4 rounded-xl font-mono text-center shadow-lg">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase">Vega (v)</span>
+                  <span className="text-xl font-extrabold text-emerald-700 mt-1 block">{matrix.greeks?.vega ?? 0.15}</span>
                 </div>
               </div>
 
               {/* ADVANCED QUANT TIME RISK EXTENSION PACK */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl flex items-center gap-3 font-mono text-xs text-gray-400">
-                  <Hourglass className="w-5 h-5 text-purple-400 shrink-0" />
+                <div className="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-3 font-mono text-xs text-slate-600">
+                  <Hourglass className="w-5 h-5 text-emerald-700 shrink-0" />
                   <div>
-                    <span className="block text-[9px] text-gray-500 font-bold uppercase">Days To Expiry</span>
-                    <span className="text-white font-bold text-sm">{daysRemaining} Days Left</span>
+                    <span className="block text-[9px] text-slate-500 font-bold uppercase">Days To Expiry</span>
+                    <span className="text-slate-900 font-bold text-sm">{daysRemaining} Days Left</span>
                   </div>
                 </div>
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl flex items-center gap-3 font-mono text-xs text-gray-400">
-                  <TrendingDown className="w-5 h-5 text-rose-400 shrink-0" />
+                <div className="bg-white border border-slate-200 p-4 rounded-xl flex items-center gap-3 font-mono text-xs text-slate-600">
+                  <TrendingDown className="w-5 h-5 text-rose-700 shrink-0" />
                   <div>
-                    <span className="block text-[9px] text-gray-500 font-bold uppercase">Est. Overnight Premium Loss</span>
-                    <span className="text-rose-400 font-bold text-sm">-{currencySymbol}{overnightHoldingRisk}</span>
+                    <span className="block text-[9px] text-slate-500 font-bold uppercase">Est. Overnight Premium Loss</span>
+                    <span className="text-rose-700 font-bold text-sm">-{currencySymbol}{overnightHoldingRisk}</span>
                   </div>
                 </div>
               </div>
 
               {matrix.volume !== undefined && matrix.open_interest !== undefined && (
-                <div className="bg-[#10141f] border border-gray-900 p-4 rounded-xl grid grid-cols-2 gap-4 text-[11px] font-mono text-gray-400">
-                  <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-emerald-400" /> Traded Volume: <span className="text-white font-bold">{matrix.volume.toLocaleString()}</span></div>
-                  <div className="flex items-center gap-2"><Layers className="w-4 h-4 text-blue-400" /> Open Interest: <span className="text-white font-bold">{matrix.open_interest.toLocaleString()}</span></div>
+                <div className="bg-white border border-slate-200 p-4 rounded-xl grid grid-cols-2 gap-4 text-[11px] font-mono text-slate-600">
+                  <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-emerald-700" /> Traded Volume: <span className="text-slate-900 font-bold">{matrix.volume.toLocaleString()}</span></div>
+                  <div className="flex items-center gap-2"><Layers className="w-4 h-4 text-blue-400" /> Open Interest: <span className="text-slate-900 font-bold">{matrix.open_interest.toLocaleString()}</span></div>
                 </div>
               )}
 
               {matrix.risk_translation && (
-                <div className="bg-[#161c2a] border border-purple-500/20 rounded-2xl p-5 space-y-2 shadow-xl animate-fadeIn">
-                  <div className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse"></span>
+                <div className="bg-[#161c2a] border border-violet-200 rounded-2xl p-5 space-y-2 shadow-xl animate-fadeIn">
+                  <div className="text-xs font-black uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400 "></span>
                     🧠 AI Risk Translator Panel
                   </div>
-                  <p className="text-gray-300 text-xs font-sans leading-relaxed font-medium bg-[#090b0f] p-4 rounded-xl border border-gray-900">
+                  <p className="text-slate-700 text-xs font-sans leading-relaxed font-medium bg-slate-50 p-4 rounded-xl border border-slate-200">
                     {matrix.risk_translation}
                   </p>
                 </div>
@@ -186,12 +186,12 @@ export default function OptionSafe({ token }: OptionSafeProps) {
 
             </div>
           ) : matrix && matrix.status === 'ERROR' ? (
-            <div className="bg-rose-500/5 border border-rose-500/20 p-5 rounded-2xl flex gap-3 text-xs text-rose-400 font-mono items-center">
+            <div className="bg-rose-500/5 border border-rose-200 p-5 rounded-2xl flex gap-3 text-xs text-rose-700 font-mono items-center">
               <ShieldAlert className="w-5 h-5 shrink-0" />
               <div><strong>Derivatives Alert:</strong> {matrix.reason}</div>
             </div>
           ) : (
-            <div className="bg-[#10141f] border border-gray-900 p-12 rounded-2xl text-center text-xs text-gray-600 font-mono tracking-wider h-full flex flex-col justify-center items-center">
+            <div className="bg-white border border-slate-200 p-12 rounded-2xl text-center text-xs text-slate-500 font-mono tracking-wider h-full flex flex-col justify-center items-center">
               <HelpCircle className="w-8 h-8 text-gray-700 mb-2" />
               ⛓️ Enter an active F&O ticker code to load real-world exchange option chains and mathematical risk states.
             </div>
