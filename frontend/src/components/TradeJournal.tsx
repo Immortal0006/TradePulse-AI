@@ -183,7 +183,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl animate-fadeIn">
+    <div className="space-y-6 w-full max-w-none animate-fadeIn">
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Trade Journal & Mindset Auditor</h1>
         <p className="text-slate-600 text-xs mt-1">Logs behavioral metrics and prints exportable social performance cards audited by AI.</p>
@@ -249,7 +249,7 @@ export default function TradeJournal({ token }: TradeJournalProps) {
               <textarea value={emotions} onChange={(e) => setEmotions(e.target.value)} placeholder="e.g. I missed the morning breakout move, felt frustrated by FOMO, and jumped in aggressively late..." className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none h-24 font-sans resize-none" required />
             </div>
 
-            <button type="submit" className="w-full bg-emerald-800 text-gray-900 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-[#00e6b8] transition-all">
+            <button type="submit" className="w-full bg-emerald-800 text-white text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-emerald-900 transition-all">
               Commit Position Entry to Journal
             </button>
           </form>

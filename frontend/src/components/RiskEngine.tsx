@@ -83,7 +83,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
     };
   }, [capital, riskPct, entryPrice, stopLoss]);
 
-  const COLORS = ['#00ffcc', '#1f2937'];
+  const COLORS = ['#167653', '#DCE5E0'];
 
   // 🚀 Transactional Order Routing Handler
   const deployInstitutionalPosition = async () => {
@@ -149,7 +149,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl animate-fadeIn h-full">
+    <div className="space-y-6 w-full max-w-none animate-fadeIn h-full">
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Quantitative Risk Engine</h1>
         <p className="text-slate-600 text-xs mt-1">Institutional position sizing calculator. Prevent account blowups by sizing trades precisely to your risk tolerance.</p>
@@ -183,7 +183,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
                 <span>Account Risk Limit</span>
                 <span className="text-rose-700 font-black">{riskPct}% (₹{riskData.riskAmount.toLocaleString()})</span>
               </div>
-              <input type="range" min="0.5" max="10" step="0.5" value={riskPct} onChange={(e) => setRiskPct(Number(e.target.value))} className="w-full accent-rose-500 bg-gray-800 h-1.5 rounded-lg cursor-pointer" />
+              <input type="range" min="0.5" max="10" step="0.5" value={riskPct} onChange={(e) => setRiskPct(Number(e.target.value))} className="w-full accent-rose-500 bg-slate-200 h-1.5 rounded-lg cursor-pointer" />
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
@@ -222,7 +222,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
                 >
                   <option value="" className="text-slate-500 font-normal">-- UNTAGGED --</option>
                   {userStrategies.map((strat) => (
-                    <option key={strat.id} value={strat.id} className="text-slate-900 bg-[#17211f]">
+                    <option key={strat.id} value={strat.id} className="text-slate-900 bg-white">
                       {strat.name.toUpperCase()}
                     </option>
                   ))}
@@ -273,7 +273,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
 
         {/* RIGHT PANEL: TELEMETRY & VISUALIZATION */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-gradient-to-br from-[#10141f] to-[#0d1017] border border-emerald-200 p-6 rounded-2xl shadow-[0_0_30px_rgba(0,255,204,0.05)] relative overflow-hidden flex items-center justify-between">
+          <div className="bg-gradient-to-br from-[#E8F4ED] to-[#F5FAF6] border border-emerald-200 p-6 rounded-2xl shadow-sm relative overflow-hidden flex items-center justify-between">
             <div>
               <span className="block text-xs text-emerald-700 font-bold uppercase tracking-widest mb-1">Maximum Allowed Position Size</span>
               <span className="text-5xl font-black text-slate-900">{(riskData.maxShares || 250).toLocaleString()} <span className="text-xl text-slate-500 font-medium">Shares</span></span>
@@ -301,7 +301,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#10141f', borderColor: '#1f2937', borderRadius: '12px', fontSize: '11px', fontFamily: 'monospace' }} itemStyle={{ color: '#fff' }} formatter={(value: number) => `₹${value.toLocaleString()}`} />
+                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#dbe5df', borderRadius: '10px', fontSize: '11px', fontFamily: 'monospace', color: '#17212b', boxShadow: '0 4px 16px rgba(15, 23, 42, 0.08)' }} itemStyle={{ color: '#17212b' }} formatter={(value: number) => `₹${value.toLocaleString()}`} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -317,7 +317,7 @@ export default function RiskEngine({ token }: RiskEngineProps) {
               </div>
               
               <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center font-mono text-xs">
-                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-800"></span> <span className="text-slate-600">Remaining Cash</span></div>
+                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-slate-300"></span> <span className="text-slate-600">Remaining Cash</span></div>
                 <span className="text-slate-900 font-bold">₹{riskData.isMarginRequired ? 0 : (capital - (riskData.totalPositionCost || (250 * entryPrice))).toLocaleString()}</span>
               </div>
 

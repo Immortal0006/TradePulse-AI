@@ -14,10 +14,10 @@ interface WatchlistProps {
 }
 // High-fidelity fallback matrix to provide instant value if server stream is buffering
 const DEFAULT_GRID_DATA: StockTick[] = [
-  { symbol: "SBIN.NS", name: "State Bank of India", price: 842.15, change: "+1.85%", timestamp: "Live" },
-  { symbol: "RELIANCE.NS", name: "Reliance Industries Ltd", price: 2945.60, change: "-0.42%", timestamp: "Live" },
-  { symbol: "TCS.NS", name: "Tata Consultancy Services", price: 4162.00, change: "+2.10%", timestamp: "Live" },
-  { symbol: "TATASTEEL.NS", name: "Tata Steel Limited", price: 164.80, change: "+3.45%", timestamp: "Live" }
+  { symbol: "SBIN.NS", name: "State Bank of India", price: 842.15, change: "+1.85%", timestamp: "Sample" },
+  { symbol: "RELIANCE.NS", name: "Reliance Industries Ltd", price: 2945.60, change: "-0.42%", timestamp: "Sample" },
+  { symbol: "TCS.NS", name: "Tata Consultancy Services", price: 4162.00, change: "+2.10%", timestamp: "Sample" },
+  { symbol: "TATASTEEL.NS", name: "Tata Steel Limited", price: 164.80, change: "+3.45%", timestamp: "Sample" }
 ];
 
 export default function Watchlist({ marketTicks }: WatchlistProps) {
@@ -53,10 +53,10 @@ export default function Watchlist({ marketTicks }: WatchlistProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl animate-fadeIn">
+    <div className="space-y-6 w-full max-w-none animate-fadeIn">
       
       {/* 1. TOP PREMIUM BANNER INTELLIGENCE LINK */}
-      <div className="bg-gradient-to-r from-purple-900/30 via-white to-emerald-50 border border-slate-200/60 rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-emerald-50 via-white to-[#F0F8F3] border border-emerald-100 rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full blur-2xl pointer-events-none"></div>
         <div className="space-y-1">
           <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function Watchlist({ marketTicks }: WatchlistProps) {
               className="w-full bg-white border border-slate-200 rounded-xl py-3.5 pl-10 pr-4 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-300 font-mono transition-colors"
             />
           </div>
-          <button type="submit" className="bg-emerald-800 hover:bg-emerald-900 text-gray-900 text-xs font-black uppercase tracking-wider px-6 rounded-xl transition-all shadow-sm">
+          <button type="submit" className="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-black uppercase tracking-wider px-6 rounded-xl transition-all shadow-sm">
             Scan
           </button>
         </form>

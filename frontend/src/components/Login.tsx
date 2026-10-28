@@ -72,7 +72,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
       <div className="w-full max-w-md bg-[#17211f] border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
         
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00ffcc] to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-600 to-transparent"></div>
 
         {/* Branding Header */}
         <div className="text-center space-y-2">
@@ -127,7 +127,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
           <button 
             type="submit" 
-            className="w-full bg-emerald-800 text-gray-900 text-xs font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-[#00e6b8] transition-all shadow-sm mt-2"
+            className="w-full bg-emerald-800 text-white text-xs font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-emerald-900 transition-all shadow-sm mt-2"
           >
             {isRegistering ? 'Execute Registration Protocol' : 'Initialize Command Workspace'}
           </button>

@@ -136,7 +136,7 @@ export default function App() {
     <div className="min-h-screen bg-[#f4f6f3] text-slate-900 flex font-sans">
       
       {/* SIDEBAR NAVIGATION GRID DRAWER */}
-      <aside className="w-64 bg-[#17211f] text-slate-100 border-r border-[#26332f] flex flex-col p-4 justify-between shrink-0">
+      <aside className="w-60 xl:w-64 bg-[#17211f] text-slate-100 border-r border-[#26332f] flex flex-col p-4 justify-between shrink-0">
         <div className="space-y-6">
           <div className="flex items-center gap-2.5 px-3 py-4 border-b border-[#30403a]">
             <Layers className="w-6 h-6 text-emerald-400" />
@@ -204,7 +204,7 @@ export default function App() {
       </aside>
 
       {/* DYNAMIC COMPONENT PANEL CANVAS ACTION CONTENT SPACE */}
-      <main className="min-w-0 flex-1 p-6 md:p-8 overflow-y-auto bg-[#f4f6f3]">
+      <main className="min-w-0 flex-1 p-5 md:p-8 overflow-y-auto bg-[#f4f6f3]">
         {activeTab === 'watchlist' && <Watchlist marketTicks={marketTicks} />}
         {activeTab === 'cost' && <CostGuard token={token} />}     
         {activeTab === 'option' && <OptionSafe token={token} />}   

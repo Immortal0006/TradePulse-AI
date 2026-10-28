@@ -74,7 +74,7 @@ export default function CostGuard({ token }: CostGuardProps) {
   const displayDegradationPerUnit = backendMetrics?.price_degradation_per_unit || 0.00;
 
   return (
-    <div className="space-y-6 max-w-6xl animate-fadeIn">
+    <div className="space-y-6 w-full max-w-none animate-fadeIn">
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Institutional Liquidity Simulator</h1>
         <p className="text-slate-600 text-xs mt-1">Visualize how large order block sizes consume order book depth, causing physical price slippage and VWAP divergence.</p>

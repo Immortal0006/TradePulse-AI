@@ -98,7 +98,7 @@ export default function StrategyHub({ token }: StrategyHubProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl animate-fadeIn">
+    <div className="space-y-6 w-full max-w-none animate-fadeIn">
       <div>
         <h1 className="text-2xl font-black text-slate-900 tracking-tight">Systematic Strategy Engine</h1>
         <p className="text-slate-600 text-xs mt-1">Configure custom logical filters and assign parameters to structure tracking models for your trade executions.</p>

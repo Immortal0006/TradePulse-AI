@@ -91,7 +91,7 @@ export default function OptionSafe({ token }: OptionSafeProps) {
             </div>
           )}
 
-          <button onClick={triggerGreeksAnalysis} className="w-full bg-emerald-800 text-gray-900 text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-[#00e6b8] transition-all">
+          <button onClick={triggerGreeksAnalysis} className="w-full bg-emerald-800 text-white text-[10px] font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-emerald-900 transition-all">
             {loading ? "Extracting Chain..." : "Scan Options Matrix"}
           </button>
         </div>
