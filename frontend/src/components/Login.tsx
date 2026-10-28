@@ -68,8 +68,8 @@ export function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-md bg-[#17211f] border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f4f6f3] text-slate-900 flex flex-col items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-8 shadow-xl space-y-6 relative overflow-hidden">
         
         {/* Decorative Top Accent Glow */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-600 to-transparent"></div>
@@ -79,21 +79,21 @@ export function Login({ onLoginSuccess }: LoginProps) {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 mb-2">
             <Layers className="w-6 h-6 text-emerald-700" />
           </div>
-          <h2 className="text-xl font-black tracking-wider text-slate-900">TRADEPULSE AI</h2>
-          <p className="text-slate-500 text-xs uppercase tracking-widest font-mono">
+          <h2 className="text-xl font-bold tracking-wider text-slate-900">TRADEPULSE AI</h2>
+          <p className="text-slate-600 text-xs uppercase tracking-widest font-mono">
             {isRegistering ? 'Provision Storage Partition' : 'Establish Quantitative Session'}
           </p>
         </div>
 
         {/* Error / Success Status Ribbons */}
         {error && (
-          <div className="bg-rose-950/40 border border-rose-900/50 p-3.5 rounded-xl text-xs text-rose-700 flex items-start gap-2 animate-fadeIn">
+          <div className="bg-rose-50 border border-rose-200 p-3.5 rounded-xl text-xs text-rose-700 flex items-start gap-2 animate-fadeIn">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
         {message && (
-          <div className="bg-emerald-950/40 border border-emerald-900/50 p-3.5 rounded-xl text-xs text-emerald-700 flex items-start gap-2 animate-fadeIn">
+          <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl text-xs text-emerald-700 flex items-start gap-2 animate-fadeIn">
             <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{message}</span>
           </div>
@@ -102,32 +102,32 @@ export function Login({ onLoginSuccess }: LoginProps) {
         {/* Form Elements */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">Terminal Identity (Email)</label>
+            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Terminal Identity (Email)</label>
             <input 
               type="email" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)}
               placeholder="operator@trade-pulse.ai"
-              className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-300/40 font-mono"
+              className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 font-mono"
               required 
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">Access Verification Code (Password)</label>
+            <label className="block text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">Access Verification Code (Password)</label>
             <input 
               type="password" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-300/40 font-mono"
+              className="w-full bg-white border border-slate-300 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 font-mono"
               required 
             />
           </div>
 
           <button 
             type="submit" 
-            className="w-full bg-emerald-800 text-white text-xs font-black uppercase tracking-widest py-3.5 rounded-xl hover:bg-emerald-900 transition-all shadow-sm mt-2"
+            className="w-full bg-emerald-800 text-white text-xs font-bold uppercase tracking-widest py-3.5 rounded-xl hover:bg-emerald-900 transition-colors shadow-sm mt-2"
           >
             {isRegistering ? 'Execute Registration Protocol' : 'Initialize Command Workspace'}
           </button>
@@ -141,7 +141,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
               setError('');
               setMessage('');
             }}
-            className="text-[10px] font-bold text-slate-500 hover:text-emerald-700 uppercase tracking-wider transition-all"
+            className="text-[10px] font-bold text-gray-500 hover:text-emerald-700 uppercase tracking-wider transition-all"
           >
             {isRegistering ? 'Already cleared? Mount Existing Profile' : 'Request New Security Authorization Keys'}
           </button>
